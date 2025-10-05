@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
-	"time"
 
 	"golang.org/x/mod/modfile"
 )
@@ -19,13 +18,16 @@ var runner = `package main
 
 import (
 	"fmt"
+	"time"
 
 	"{{ .PkgPath }}"
 )
 
 func main() {
+	start := time.Now()
 	result := {{ .PkgName }}.{{ .FuncName }}("{{ .FuncArg }}")
 	fmt.Println("Res:", result)
+	fmt.Println("Dur:", time.Since(start))
 }`
 
 type data struct {
@@ -66,11 +68,9 @@ func Run(year, day, part, input string) error {
 	defer os.RemoveAll(dir)
 	defer file.Close()
 
-	start := time.Now()
 	if err = executeRunner(path); err != nil {
 		return fmt.Errorf("executing runner: %v", err)
 	}
-	fmt.Println("Dur:", time.Since(start))
 
 	return nil
 }
