@@ -26,8 +26,9 @@ import (
 func main() {
 	start := time.Now()
 	result := {{ .PkgName }}.{{ .FuncName }}("{{ .FuncArg }}")
+	dur := time.Since(start)
 	fmt.Println("Res:", result)
-	fmt.Println("Dur:", time.Since(start))
+	fmt.Println("Dur:", dur)
 }`
 
 type data struct {
@@ -46,56 +47,45 @@ func Run(year, day, part, input string) error {
 
 	fmt.Printf("Running %s/%s/%s with %s\n", year, day, part, inputFile)
 
-	//TODO: New attempt
-	wd, err := os.Getwd()
-	if err != nil {
-		return fmt.Errorf("starting runner: %v", err)
-	}
 	mod, err := currentModulePath()
 	if err != nil {
 		return fmt.Errorf("starting runner: %v", err)
 	}
 
-	dir, path, file, err := createRunner(data{
+	file, err := createRunner(data{
 		PkgPath:  path.Join(mod, year, "solutions", day),
 		PkgName:  day,
-		FuncName: strings.Replace(part, "p", "P", -1),
-		FuncArg:  filepath.Join(wd, inputPath, inputFile),
+		FuncName: strings.Replace(part, "p", "P", 1),
+		FuncArg:  filepath.Join(inputPath, inputFile),
 	})
 	if err != nil {
 		return fmt.Errorf("starting runner: %v", err)
 	}
-	defer os.RemoveAll(dir)
+	defer os.RemoveAll(file.Name())
 	defer file.Close()
 
-	if err = executeRunner(path); err != nil {
+	if err = executeRunner(); err != nil {
 		return fmt.Errorf("executing runner: %v", err)
 	}
 
 	return nil
 }
 
-func createRunner(data data) (dirPath, filePath string, file *os.File, err error) {
-	dir, err := os.MkdirTemp("", "aoc-runner-*")
+func createRunner(data data) (*os.File, error) {
+	file, err := os.CreateTemp(".", "runner-*.go")
 	if err != nil {
-		return "", "", nil, fmt.Errorf("setting up runner: %v", err)
-	}
-
-	path := filepath.Join(dir, "runner.go")
-	file, err = os.Create(path)
-	if err != nil {
-		return "", "", nil, fmt.Errorf("setting up runner: %v", err)
+		return nil, fmt.Errorf("setting up runner: %v", err)
 	}
 
 	if err = template.Must(template.New("runner").Parse(runner)).Execute(file, data); err != nil {
-		return "", "", nil, fmt.Errorf("setting up runner: %v", err)
+		return nil, fmt.Errorf("setting up runner: %v", err)
 	}
 
-	return dir, path, file, nil
+	return file, nil
 }
 
-func executeRunner(path string) error {
-	cmd := exec.Command("go", "run", path)
+func executeRunner() error {
+	cmd := exec.Command("go", "run", ".")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
