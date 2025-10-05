@@ -45,6 +45,10 @@ func main() {
 		fmt.Println("Error:", err)
 	}
 
+	if err := validate(in); err != nil {
+		fmt.Println("Error:", err)
+	}
+
 	switch in.op {
 	case opRun:
 		err = internal.Run(in.year, in.day, in.part, in.input)
@@ -93,6 +97,20 @@ func parseInput(args []string) (input, error) {
 	}
 
 	return in, nil
+}
+
+func validate(input input) error {
+	if _, err := strconv.Atoi(input.year); err != nil {
+		return fmt.Errorf("year (%s) must be a number", input.year)
+	}
+	if _, err := strconv.Atoi(input.day); err != nil {
+		return fmt.Errorf("day (%s) must be a number", input.day)
+	}
+	if i, err := strconv.Atoi(input.part); err != nil || i > 2 || i < 1 {
+		return fmt.Errorf("part (%s) must be either 1 or 2", input.part)
+	}
+
+	return nil
 }
 
 func defaultInput() input {
