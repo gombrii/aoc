@@ -6,6 +6,7 @@ import (
 	"iter"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gombrii/aoc/internal"
@@ -43,10 +44,12 @@ func main() {
 	in, err := parseInput(os.Args)
 	if err != nil {
 		fmt.Println("Error:", err)
+		return
 	}
 
 	if err := validate(in); err != nil {
 		fmt.Println("Error:", err)
+		return
 	}
 
 	switch in.op {
@@ -92,7 +95,10 @@ func parseInput(args []string) (input, error) {
 		case "-i", "--input":
 			in.input = val
 		default:
-			return input{}, fmt.Errorf("unknown parameter (%s)", param)
+			if strings.HasPrefix(param, "-") {
+				return input{}, fmt.Errorf("unknown parameter %q", param)
+			}
+			return input{}, fmt.Errorf("loose argument %q", param)
 		}
 	}
 
@@ -101,13 +107,13 @@ func parseInput(args []string) (input, error) {
 
 func validate(input input) error {
 	if _, err := strconv.Atoi(input.year); err != nil {
-		return fmt.Errorf("year (%s) must be a number", input.year)
+		return fmt.Errorf("year %q must be a number", input.year)
 	}
 	if _, err := strconv.Atoi(input.day); err != nil {
-		return fmt.Errorf("day (%s) must be a number", input.day)
+		return fmt.Errorf("day %q must be a number", input.day)
 	}
 	if i, err := strconv.Atoi(input.part); err != nil || i > 2 || i < 1 {
-		return fmt.Errorf("part (%s) must be either 1 or 2", input.part)
+		return fmt.Errorf("part %q must be either 1 or 2", input.part)
 	}
 
 	return nil
