@@ -19,16 +19,38 @@ var runner = `package main
 import (
 	"fmt"
 	"time"
-
-	"{{ .PkgPath }}"
+	"os"
+	_ "github.com/gombrii/Advent-of-code/2023/solutions/day1"
+	_ "github.com/gombrii/Advent-of-code/2023/solutions/day2"
+	_ "github.com/gombrii/Advent-of-code/2024/solutions/day1"
+	_ "github.com/gombrii/Advent-of-code/2024/solutions/day10"
+	_ "github.com/gombrii/Advent-of-code/2024/solutions/day2"
+	_ "github.com/gombrii/Advent-of-code/2024/solutions/day3"
+	_ "github.com/gombrii/Advent-of-code/2024/solutions/day4"
+	_ "github.com/gombrii/Advent-of-code/2024/solutions/day5"
+	_ "github.com/gombrii/Advent-of-code/2024/solutions/day6"
+	_ "github.com/gombrii/Advent-of-code/2024/solutions/day7"
+	_ "github.com/gombrii/Advent-of-code/2024/solutions/day8"
+	_ "github.com/gombrii/Advent-of-code/2024/solutions/day9"
+	"github.com/gombrii/Advent-of-code/shared/registry"
 )
 
 func main() {
+	solution := registry.Registry["2024"]["day7"]["part1"]
+	if solution == nil {
+		fmt.Println("Error: Solution not found!")
+		os.Exit(1)
+	}
 	start := time.Now()
-	result := {{ .PkgName }}.{{ .FuncName }}("{{ .FuncArg }}")
-	dur := time.Since(start)
+	result := solution("{{ .FuncArg }}")
 	fmt.Println("Res:", result)
-	fmt.Println("Dur:", dur)
+	fmt.Println("Dur:", time.Since(start))
+
+	//start := time.Now()
+	//result := {{ .PkgName }}.{{ .FuncName }}("{{ .FuncArg }}")
+	//dur := time.Since(start)
+	//fmt.Println("Res:", result)
+	//fmt.Println("Dur:", dur)
 }`
 
 type data struct {
@@ -61,7 +83,7 @@ func Run(year, day, part, input string) error {
 	if err != nil {
 		return fmt.Errorf("starting runner: %v", err)
 	}
-	defer os.RemoveAll(file.Name())
+	//defer os.RemoveAll(file.Name())
 	defer file.Close()
 
 	if err = executeRunner(); err != nil {
