@@ -25,7 +25,7 @@ import (
 )
 
 func main() {
-	data := read("{{ .FuncArg }}")
+	data := read("{{ .InputPath }}")
 	start := time.Now()
 	result := {{ .PkgName }}.{{ .FuncName }}(data)
 	dur := time.Since(start)
@@ -50,10 +50,10 @@ func read(path string) []byte {
 }`
 
 type data struct {
-	PkgPath  string
-	PkgName  string
-	FuncName string
-	FuncArg  string
+	PkgPath   string
+	PkgName   string
+	FuncName  string
+	InputPath string
 }
 
 func Run(year, day, part, input string) error {
@@ -74,10 +74,10 @@ func Run(year, day, part, input string) error {
 	}
 
 	file, err := createRunner(data{
-		PkgPath:  path.Join(mod, year, "solutions", day),
-		PkgName:  day,
-		FuncName: strings.Replace(part, "p", "P", 1),
-		FuncArg:  filepath.Join(inputPath, inputFile),
+		PkgPath:   path.Join(mod, year, "solutions", day),
+		PkgName:   day,
+		FuncName:  strings.Replace(part, "p", "P", 1),
+		InputPath: filepath.Join(inputPath, inputFile),
 	})
 	if err != nil {
 		return fmt.Errorf("starting runner: %v", err)
