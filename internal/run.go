@@ -19,16 +19,34 @@ var runner = `package main
 import (
 	"fmt"
 	"time"
+	"os"
 
 	"{{ .PkgPath }}"
 )
 
 func main() {
+	data := read("{{ .FuncArg }}")
 	start := time.Now()
-	result := {{ .PkgName }}.{{ .FuncName }}("{{ .FuncArg }}")
+	result := {{ .PkgName }}.{{ .FuncName }}(data)
 	dur := time.Since(start)
 	fmt.Println("Res:", result)
 	fmt.Println("Dur:", dur)
+}
+	
+func read(path string) []byte {
+	_, err := os.Stat(path)
+	if err != nil {
+		fmt.Printf("Error: invalid file path: %v", err)
+		os.Exit(1)
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		fmt.Printf("Error: could not read file: %v", err)
+		os.Exit(1)
+	}
+
+	return data
 }`
 
 type data struct {
@@ -42,10 +60,13 @@ func Run(year, day, part, input string) error {
 	day = fmt.Sprintf("day%s", day)
 	part = fmt.Sprintf("part%s", part)
 
-	inputPath := fmt.Sprintf("%s/input/%s", year, day)
+	inputPath := filepath.Join(year, "input", day)
 	inputFile := fmt.Sprintf("%s.txt", input)
 
-	fmt.Printf("Running %s/%s/%s with %s\n", year, day, part, inputFile)
+	if _, err := os.Stat(filepath.Join(year, "solutions", day, fmt.Sprintf("%s.go", part))); err != nil {
+		return fmt.Errorf("%v does not exist", filepath.Join(year, day, part))
+	}
+	fmt.Printf("Running %s with %s\n", filepath.Join(year, day, part), inputFile)
 
 	mod, err := currentModulePath()
 	if err != nil {

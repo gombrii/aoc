@@ -9,16 +9,16 @@ import (
 
 const part1 = `package {{.Day}}
 
-func Part1(file string) any {
-	//in := input.Slice(file)
+func Part1(data []byte) any {
+	//in := input.Lines(data)
 
 	return "NOT IMPLEMENTED!"
 }`
 
 const part2 = `package {{.Day}}
 
-func Part2(file string) any {
-	//in := input.Slice(file)
+func Part2(data []byte) any {
+	//in := input.Lines(data)
 
 	return "NOT IMPLEMENTED!"
 }`
