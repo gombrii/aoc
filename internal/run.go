@@ -61,10 +61,10 @@ func Run(year, day, part, input string) error {
 	if err != nil {
 		return fmt.Errorf("starting runner: %v", err)
 	}
-	defer os.RemoveAll(file.Name())
+	defer os.RemoveAll(filepath.Dir(file.Name()))
 	defer file.Close()
 
-	if err = executeRunner(); err != nil {
+	if err = executeRunner(file.Name()); err != nil {
 		return fmt.Errorf("executing runner: %v", err)
 	}
 
@@ -72,7 +72,12 @@ func Run(year, day, part, input string) error {
 }
 
 func createRunner(data data) (*os.File, error) {
-	file, err := os.CreateTemp(".", "runner-*.go")
+	dir, err := os.MkdirTemp("", "aoc-runner-*")
+	if err != nil {
+		return nil, fmt.Errorf("setting up runner: %v", err)
+	}
+
+	file, err := os.Create(filepath.Join(dir, "runner.go"))
 	if err != nil {
 		return nil, fmt.Errorf("setting up runner: %v", err)
 	}
@@ -84,8 +89,8 @@ func createRunner(data data) (*os.File, error) {
 	return file, nil
 }
 
-func executeRunner() error {
-	cmd := exec.Command("go", "run", ".")
+func executeRunner(path string) error {
+	cmd := exec.Command("go", "run", path)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
