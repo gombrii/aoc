@@ -21,8 +21,8 @@ const (
 
 const usage = `Usage:
   aoc --day DAY --part PART [--year YEAR default: {{year}}] [--input INPUT default: input]
-  aoc init <module>
   aoc init --day DAY [--year YEAR default: {{year}}]
+  aoc init <module>
 
 Commands:
   run (default)      Run a solution for a given day and part
@@ -44,7 +44,7 @@ type input struct {
 }
 
 func main() {
-	if len(os.Args) == 1 {
+	if len(os.Args) == 1 || len(os.Args) == 2 && (os.Args[1] == "h" || os.Args[1] == "help" || os.Args[1] == "-h" || os.Args[1] == "--help") {
 		fmt.Println(strings.ReplaceAll(usage, "{{year}}", defaultInput().year))
 		return
 	}
@@ -78,9 +78,12 @@ func parseInput(args []string) (input, error) {
 	in := defaultInput()
 	i := 1
 
-	if args[i] == "init" {
-		i++
+	switch args[i] {
+	case "init":
 		in.op = opInit
+		fallthrough
+	case "run":
+		i++
 	}
 
 	for param, val := range argIter(args[i:]) {
