@@ -78,13 +78,12 @@ func create(parentDir string, year string, structure map[string]map[string]strin
 			if err != nil {
 				return fmt.Errorf("creating file %s: %v", filePath, err)
 			}
+			defer file.Close()
 
 			err = tmpl.Execute(file, data)
 			if err != nil {
 				return fmt.Errorf("writing to file %s: %v", filePath, err)
 			}
-
-			file.Close()
 		}
 	}
 
