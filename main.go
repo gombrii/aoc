@@ -19,14 +19,20 @@ const (
 	opInitDay = "initDay"
 )
 
-// TODO: Update usage
-const usage = `Usage: aoc [--year YEAR] --day DAY --part PART [--input INPUT]
+const usage = `Usage:
+  aoc --day DAY --part PART [--year YEAR default: {{year}}] [--input INPUT default: input]
+  aoc init <module>
+  aoc init --day DAY [--year YEAR default: {{year}}]
 
-Options:
-  --year YEAR, -y YEAR [default: %s]
-  --day DAY, -d DAY
-  --part PART, -p PART
-  --input INPUT, -i INPUT [default: input]`
+Commands:
+  run (default)      Run a solution for a given day and part
+  init               Initialize either a new AoC module or a new day
+
+Examples:
+  aoc -d 1 -p 1                    # Run part 1 of day 1 for the default year ({{year}})
+  aoc -y 2023 -d 5 -p 2 -i test    # Run part 2 of day 5 year 2023 using input file "test.txt"
+  aoc init mymodule                # Initialize a new AoC module named mymodule (creates project structure)
+  aoc init --day 3                 # Initialize solution files for day 3 for the default year ({{year}})`
 
 type input struct {
 	op     string
@@ -39,7 +45,7 @@ type input struct {
 
 func main() {
 	if len(os.Args) == 1 {
-		fmt.Printf(usage, defaultInput().year)
+		fmt.Println(strings.ReplaceAll(usage, "{{year}}", defaultInput().year))
 		return
 	}
 
