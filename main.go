@@ -14,6 +14,7 @@ import (
 
 const (
 	opRun     = "run"
+	opInit    = "init"
 	opInitAoc = "initAoc"
 	opInitDay = "initDay"
 )
@@ -28,11 +29,12 @@ Options:
   --input INPUT, -i INPUT [default: input]`
 
 type input struct {
-	op    string
-	year  string
-	day   string
-	part  string
-	input string
+	op     string
+	year   string
+	day    string
+	part   string
+	input  string
+	module string
 }
 
 func main() {
@@ -58,7 +60,7 @@ func main() {
 	case opInitDay:
 		err = internal.GenDay(in.year, in.day)
 	case opInitAoc:
-		err = internal.GenAoc()
+		err = internal.GenAoc(in.module)
 	}
 
 	if err != nil {
@@ -71,34 +73,32 @@ func parseInput(args []string) (input, error) {
 	i := 1
 
 	if args[i] == "init" {
-		if len(args) == 2 {
-			in.op = opInitAoc
-			return in, nil
-		}
 		i++
-		in.op = opInitDay
+		in.op = opInit
 	}
 
-	//TODO: Better feedback
-	if (len(args)-i)%2 != 0 {
-		return input{}, errors.New("uneven number of arguments")
-	}
-
-	for param, val := range argIter(args, i) {
+	for param, val := range argIter(args[i:]) {
 		switch param {
 		case "-y", "--year":
 			in.year = val
 		case "-d", "--day":
 			in.day = val
+			if in.op == opInit {
+				in.op = opInitDay
+			}
 		case "-p", "--part":
 			in.part = val
 		case "-i", "--input":
 			in.input = val
 		default:
-			if strings.HasPrefix(param, "-") {
-				return input{}, fmt.Errorf("unknown parameter %q", param)
+			if in.op != opInit {
+				if strings.HasPrefix(param, "-") {
+					return input{}, fmt.Errorf("unknown parameter %q", param)
+				}
+				return input{}, fmt.Errorf("loose argument %q", param)
 			}
-			return input{}, fmt.Errorf("loose argument %q", param)
+			in.module = param
+			in.op = opInitAoc
 		}
 	}
 
@@ -106,14 +106,31 @@ func parseInput(args []string) (input, error) {
 }
 
 func validate(input input) error {
-	if _, err := strconv.Atoi(input.year); err != nil {
-		return fmt.Errorf("year %q must be a number", input.year)
-	}
-	if _, err := strconv.Atoi(input.day); err != nil {
-		return fmt.Errorf("day %q must be a number", input.day)
-	}
-	if i, err := strconv.Atoi(input.part); err != nil || i > 2 || i < 1 {
-		return fmt.Errorf("part %q must be either 1 or 2", input.part)
+	switch input.op {
+	case opInitAoc:
+		if input.module == "" {
+			return errors.New("no module name provided")
+		}
+	case opRun:
+		if input.part == "" {
+			return errors.New("no part (-p) provided")
+		}
+		if i, err := strconv.Atoi(input.part); err != nil || i > 2 || i < 1 {
+			return fmt.Errorf("part %q must be either 1 or 2", input.part)
+		}
+		fallthrough
+	case opInitDay:
+		if _, err := strconv.Atoi(input.year); err != nil {
+			return fmt.Errorf("year %q must be a number", input.year)
+		}
+		if input.day == "" {
+			return errors.New("no day (-d) provided")
+		}
+		if _, err := strconv.Atoi(input.day); err != nil {
+			return fmt.Errorf("day %q must be a number", input.day)
+		}
+	case opInit:
+		return errors.New("missing init argument")
 	}
 
 	return nil
@@ -135,11 +152,14 @@ func defaultInput() input {
 	}
 }
 
-func argIter(args []string, n int) iter.Seq2[string, string] {
+func argIter(args []string) iter.Seq2[string, string] {
 	return func(yield func(string, string) bool) {
-		for i := n; i < len(args); i += 2 {
-			//TODO: Maybe return empty second value if uneven length
-			if !yield(args[i], args[i+1]) {
+		for i := 0; i < len(args); i += 2 {
+			var second string
+			if i+1 < len(args) {
+				second = args[i+1]
+			}
+			if !yield(args[i], second) {
 				return
 			}
 		}
