@@ -5,14 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
-	"strings"
 	"text/template"
 )
-
-const mod = `module {{.Mod}}
-
-{{.Version}}`
 
 const exit = `// Package exit does, in the spirit of Advent of Code, provide quick and dirty ways to fail 
 package exit
@@ -68,27 +62,8 @@ func Matrix(data []byte, delimiter string) [][]string {
 	return matrix
 }`
 
-// NOTE: Generates project scaffolding, which is really just the shared folder with some nice to haves:
-// - input
-// - exit
-// - render
-// - go.mod
-// Maybe the init AOC command should also take a single string with the mod name, like go mod init
 func GenAoc(module string) error {
-	//Generate shared folder with all it contains and go.mod file, I guess with the go version the user has
-
-	out, err := exec.Command("go", "version").Output()
-	if err != nil {
-		return err
-	}
-	ver := strings.TrimSpace(string(out))
-	ver = regexp.MustCompile(`go\d\.\d{2}\.\d`).FindString(ver)
-	ver = strings.Replace(ver, "go", "go ", 1)
-
-	err = createFile("go.mod", mod, map[string]string{
-		"Mod":     module,
-		"Version": ver,
-	})
+	err := exec.Command("go", "mod", "init", module).Run()
 	if err != nil {
 		return fmt.Errorf("initiating go.mod: %v", err)
 	}
