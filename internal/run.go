@@ -13,7 +13,7 @@ import (
 	"golang.org/x/mod/modfile"
 )
 
-var runner = `package main
+const runner = `package main
 
 import (
 	"fmt"
@@ -51,13 +51,12 @@ func read(path string) []byte {
 func Run(year, day, part, input string) error {
 	day = fmt.Sprintf("day%s", day)
 	part = fmt.Sprintf("part%s", part)
-
-	inputPath := filepath.Join(year, "input", day)
 	inputFile := fmt.Sprintf("%s.txt", input)
 
 	if _, err := os.Stat(filepath.Join(year, "solutions", day, fmt.Sprintf("%s.go", part))); err != nil {
 		return fmt.Errorf("%v does not exist", filepath.Join(year, day, part))
 	}
+
 	fmt.Printf("Running %s with %s\n", filepath.Join(year, day, part), inputFile)
 
 	mod, err := currentModulePath()
@@ -65,41 +64,60 @@ func Run(year, day, part, input string) error {
 		return fmt.Errorf("starting runner: %v", err)
 	}
 
-	file, err := createRunner(map[string]string{
+	file, err := getRunner(year, day, part, input, map[string]string{
 		"PkgPath":   filepath.Join(mod, year, "solutions", day),
 		"PkgName":   day,
 		"FuncName":  strings.Replace(part, "p", "P", 1),
-		"InputPath": filepath.Join(inputPath, inputFile),
+		"InputPath": filepath.Join(year, "input", day, inputFile),
 	})
 	if err != nil {
-		return fmt.Errorf("starting runner: %v", err)
+		return fmt.Errorf("setting up runner: %v", err)
 	}
-	defer os.RemoveAll(filepath.Dir(file.Name()))
 
-	if err = executeRunner(file.Name()); err != nil {
+	if err = executeRunner(file); err != nil {
 		return fmt.Errorf("executing runner: %v", err)
 	}
 
 	return nil
 }
 
-func createRunner(data map[string]string) (*os.File, error) {
-	dir, err := os.MkdirTemp("", "aoc-runner-*")
+func getRunner(year, day, part, input string, data map[string]string) (string, error) {
+	osCache, err := os.UserCacheDir()
 	if err != nil {
-		return nil, fmt.Errorf("setting up runner: %v", err)
+		return "", fmt.Errorf("finding cache location: %v", err)
 	}
 
-	file, err := os.Create(filepath.Join(dir, "runner.go"))
+	file := filepath.Join(osCache, "gombrii-aoc", fmt.Sprintf("%s-%s-%s-%s", year, day, part, input), "runner.go")
+
+	if _, err := os.Stat(file); err == nil{
+		return file, nil
+	}
+
+	return file, createRunner(file, data)
+}
+
+func createRunner(fileName string, data map[string]string) error {
+	dir := filepath.Dir(fileName)
+	
+	err := os.MkdirAll(dir, 0755)
 	if err != nil {
-		return nil, fmt.Errorf("setting up runner: %v", err)
+		os.RemoveAll(dir)
+		return fmt.Errorf("creating temp dir: %v", err)
+	}
+
+	file, err := os.Create(fileName)
+	if err != nil {
+		os.RemoveAll(dir)
+		return fmt.Errorf("creating runner file: %v", err)
 	}
 	defer file.Close()
 
 	if err = template.Must(template.New("runner").Parse(runner)).Execute(file, data); err != nil {
-		return nil, fmt.Errorf("setting up runner: %v", err)
+		os.RemoveAll(dir)
+		return fmt.Errorf("compiling runner: %v", err)
 	}
 
-	return file, nil
+	return nil
 }
 
 func executeRunner(path string) error {

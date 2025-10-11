@@ -12,6 +12,10 @@ import (
 	"github.com/gombrii/aoc/internal"
 )
 
+//TODO: 
+// - run cache cleanup on files older than 7 days
+// - add command aoc clean to remove complete cache including gombrii-aoc.
+
 const (
 	opRun     = "run"
 	opInit    = "init"
