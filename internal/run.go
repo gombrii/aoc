@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -49,13 +48,6 @@ func read(path string) []byte {
 	return data
 }`
 
-type data struct {
-	PkgPath   string
-	PkgName   string
-	FuncName  string
-	InputPath string
-}
-
 func Run(year, day, part, input string) error {
 	day = fmt.Sprintf("day%s", day)
 	part = fmt.Sprintf("part%s", part)
@@ -73,17 +65,16 @@ func Run(year, day, part, input string) error {
 		return fmt.Errorf("starting runner: %v", err)
 	}
 
-	file, err := createRunner(data{
-		PkgPath:   path.Join(mod, year, "solutions", day),
-		PkgName:   day,
-		FuncName:  strings.Replace(part, "p", "P", 1),
-		InputPath: filepath.Join(inputPath, inputFile),
+	file, err := createRunner(map[string]string{
+		"PkgPath":   filepath.Join(mod, year, "solutions", day),
+		"PkgName":   day,
+		"FuncName":  strings.Replace(part, "p", "P", 1),
+		"InputPath": filepath.Join(inputPath, inputFile),
 	})
 	if err != nil {
 		return fmt.Errorf("starting runner: %v", err)
 	}
 	defer os.RemoveAll(filepath.Dir(file.Name()))
-	defer file.Close()
 
 	if err = executeRunner(file.Name()); err != nil {
 		return fmt.Errorf("executing runner: %v", err)
@@ -92,7 +83,7 @@ func Run(year, day, part, input string) error {
 	return nil
 }
 
-func createRunner(data data) (*os.File, error) {
+func createRunner(data map[string]string) (*os.File, error) {
 	dir, err := os.MkdirTemp("", "aoc-runner-*")
 	if err != nil {
 		return nil, fmt.Errorf("setting up runner: %v", err)
@@ -102,6 +93,7 @@ func createRunner(data data) (*os.File, error) {
 	if err != nil {
 		return nil, fmt.Errorf("setting up runner: %v", err)
 	}
+	defer file.Close()
 
 	if err = template.Must(template.New("runner").Parse(runner)).Execute(file, data); err != nil {
 		return nil, fmt.Errorf("setting up runner: %v", err)

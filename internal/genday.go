@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"text/template"
 )
 
@@ -61,7 +62,7 @@ func GenDay(year, day string) error {
 
 func create(parentDir string, year string, structure map[string]map[string]string, data map[string]any) error {
 	for dir, files := range structure {
-		err := os.MkdirAll(path.Join(year, parentDir, dir), 0755)
+		err := os.MkdirAll(filepath.Join(year, parentDir, dir), 0755)
 		if err != nil {
 			return fmt.Errorf("creating directory %s: %v", dir, err)
 		}
