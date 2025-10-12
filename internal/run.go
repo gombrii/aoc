@@ -123,7 +123,12 @@ func executeRunner(rPath string) error {
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 
-	return cmd.Run()
+	var exitErr *exec.ExitError
+	if err := cmd.Run(); err != nil && !errors.As(err, &exitErr) {
+		return err
+	}
+
+	return nil
 }
 
 func currentModulePath() (string, error) {
