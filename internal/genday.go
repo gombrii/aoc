@@ -2,10 +2,9 @@ package internal
 
 import (
 	"fmt"
-	"os"
-	"path"
 	"path/filepath"
-	"text/template"
+
+	"github.com/gombrii/aoc/internal/gen"
 )
 
 const part1 = `package {{.Day}}
@@ -29,64 +28,21 @@ const common = `package {{.Day}}`
 func GenDay(year, day string) error {
 	day = fmt.Sprintf("day%s", day)
 
-	solution := map[string]map[string]string{
-		day: {
-			"part1.go":  part1,
-			"part2.go":  part2,
-			"common.go": common,
-		},
+	data := map[string]string{
+		"Day": day,
 	}
 
-	input := map[string]map[string]string{
-		day: {
-			"input.txt": "",
-			"test.txt":  "",
-		},
-	}
-
-	data := map[string]any{
-		"Day":  day,
-		"Year": year,
-	}
-
-	if err := create("solutions", year, solution, data); err != nil {
-		return fmt.Errorf("generating solution scaffolding: %v", err)
-	}
-	if err := create("input", year, input, data); err != nil {
-		return fmt.Errorf("generating input scaffolding: %v", err)
+	if err := gen.Files(data, map[string]string{
+		filepath.Join(year, "solutions", day, "part1.go"):  part1,
+		filepath.Join(year, "solutions", day, "part2.go"):  part2,
+		filepath.Join(year, "solutions", day, "common.go"): common,
+		filepath.Join(year, "input", day, "input.txt"):     "",
+		filepath.Join(year, "input", day, "test.txt"):      "",
+	}); err != nil {
+		return fmt.Errorf("generating files: %v", err)
 	}
 
 	fmt.Printf("Initiated %s %s\n", day, year)
-	return nil
-}
-
-func create(parentDir string, year string, structure map[string]map[string]string, data map[string]any) error {
-	for dir, files := range structure {
-		err := os.MkdirAll(filepath.Join(year, parentDir, dir), 0755)
-		if err != nil {
-			return fmt.Errorf("creating directory %s: %v", dir, err)
-		}
-
-		for fileName, templateContent := range files {
-			filePath := path.Join(year, parentDir, dir, fileName)
-
-			tmpl, err := template.New(fileName).Parse(templateContent)
-			if err != nil {
-				return fmt.Errorf("parsing template for file %s: %v", filePath, err)
-			}
-
-			file, err := os.Create(filePath)
-			if err != nil {
-				return fmt.Errorf("creating file %s: %v", filePath, err)
-			}
-			defer file.Close()
-
-			err = tmpl.Execute(file, data)
-			if err != nil {
-				return fmt.Errorf("writing to file %s: %v", filePath, err)
-			}
-		}
-	}
 
 	return nil
 }

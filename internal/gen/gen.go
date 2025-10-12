@@ -1,0 +1,34 @@
+package gen
+
+import (
+	"fmt"
+	"html/template"
+	"os"
+	"path/filepath"
+)
+
+func Files(data map[string]string, structure map[string]string) error {
+	for fPath, tmpl := range structure {
+		if _, err := os.Stat(fPath); err == nil {
+			fmt.Printf("%s already exists", fPath)
+			continue
+		}
+
+		if err := os.MkdirAll(filepath.Dir(fPath), 0755); err != nil {
+			return fmt.Errorf("creating dir %s: %v", filepath.Dir(fPath), err)
+		}
+
+		file, err := os.Create(fPath)
+		if err != nil {
+			return fmt.Errorf("creating file %s: %v", fPath, err)
+		}
+		defer file.Close()
+
+		if err = template.Must(template.New(filepath.Base(fPath)).Parse(tmpl)).Execute(file, data); err != nil {
+			os.Remove(file.Name())
+			return fmt.Errorf("compiling file %s: %v", fPath, err)
+		}
+	}
+
+	return nil
+}
