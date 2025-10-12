@@ -10,6 +10,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/gombrii/aoc/internal/cache"
 	"golang.org/x/mod/modfile"
 )
 
@@ -64,7 +65,7 @@ func Run(year, day, part, input string) error {
 		return fmt.Errorf("starting runner: %v", err)
 	}
 
-	file, err := getRunner(year, day, part, input, map[string]string{
+	path, err := getRunnerPath(year, day, part, input, map[string]string{
 		"PkgPath":   filepath.Join(mod, year, "solutions", day),
 		"PkgName":   day,
 		"FuncName":  strings.Replace(part, "p", "P", 1),
@@ -74,54 +75,50 @@ func Run(year, day, part, input string) error {
 		return fmt.Errorf("setting up runner: %v", err)
 	}
 
-	if err = executeRunner(file); err != nil {
+	if err = executeRunner(path); err != nil {
 		return fmt.Errorf("executing runner: %v", err)
 	}
 
 	return nil
 }
 
-func getRunner(year, day, part, input string, data map[string]string) (string, error) {
-	osCache, err := os.UserCacheDir()
+func getRunnerPath(year, day, part, input string, data map[string]string) (string, error) {
+	cacheKey := fmt.Sprintf("%s-%s-%s-%s", year, day, part, input)
+
+	if cPath, ok := cache.Contains(cacheKey); ok {
+		return cPath, nil
+	}
+
+	rPath, err := createRunner(data)
 	if err != nil {
-		return "", fmt.Errorf("finding cache location: %v", err)
+		return "", fmt.Errorf("creating runner: %v", err)
 	}
 
-	file := filepath.Join(osCache, "gombrii-aoc", fmt.Sprintf("%s-%s-%s-%s", year, day, part, input), "runner.go")
-
-	if _, err := os.Stat(file); err == nil{
-		return file, nil
+	cPath, err := cache.Store(cacheKey, rPath)
+	if err != nil {
+		return "", fmt.Errorf("caching runner: %v", err)
 	}
 
-	return file, createRunner(file, data)
+	return cPath, nil
 }
 
-func createRunner(fileName string, data map[string]string) error {
-	dir := filepath.Dir(fileName)
-	
-	err := os.MkdirAll(dir, 0755)
+func createRunner(data map[string]string) (string, error) {
+	file, err := os.CreateTemp("", "runner-*")
 	if err != nil {
-		os.RemoveAll(dir)
-		return fmt.Errorf("creating temp dir: %v", err)
-	}
-
-	file, err := os.Create(fileName)
-	if err != nil {
-		os.RemoveAll(dir)
-		return fmt.Errorf("creating runner file: %v", err)
+		return "", fmt.Errorf("creating file: %v", err)
 	}
 	defer file.Close()
 
 	if err = template.Must(template.New("runner").Parse(runner)).Execute(file, data); err != nil {
-		os.RemoveAll(dir)
-		return fmt.Errorf("compiling runner: %v", err)
+		os.Remove(file.Name())
+		return "", fmt.Errorf("compiling: %v", err)
 	}
 
-	return nil
+	return file.Name(), nil
 }
 
-func executeRunner(path string) error {
-	cmd := exec.Command("go", "run", path)
+func executeRunner(rPath string) error {
+	cmd := exec.Command("go", "run", rPath)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin

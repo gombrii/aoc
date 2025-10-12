@@ -12,15 +12,12 @@ import (
 	"github.com/gombrii/aoc/internal"
 )
 
-//TODO: 
-// - run cache cleanup on files older than 7 days
-// - add command aoc clean to remove complete cache including gombrii-aoc.
-
 const (
-	opRun     = "run"
-	opInit    = "init"
-	opInitAoc = "initAoc"
-	opInitDay = "initDay"
+	opRun        = "run"
+	opInit       = "init"
+	opInitAoc    = "initAoc"
+	opInitDay    = "initDay"
+	opClearCache = "clarCache"
 )
 
 const usage = `Usage:
@@ -71,6 +68,7 @@ func main() {
 		err = internal.GenDay(in.year, in.day)
 	case opInitAoc:
 		err = internal.GenAoc(in.module)
+	case opClearCache:
 	}
 
 	if err != nil {
@@ -85,12 +83,17 @@ func parseInput(args []string) (input, error) {
 	switch args[i] {
 	case "init":
 		in.op = opInit
-		fallthrough
+		i++
 	case "run":
 		i++
+	case "cache":
+		if len(args) > 2 && args[i+1] == "clear" {
+			in.op = opClearCache
+			return in, nil
+		}
 	}
 
-	for param, val := range argIter(args[i:]) {
+	for param, val := range paramVals(args[i:]) {
 		switch param {
 		case "-y", "--year":
 			in.year = val
@@ -165,7 +168,7 @@ func defaultInput() input {
 	}
 }
 
-func argIter(args []string) iter.Seq2[string, string] {
+func paramVals(args []string) iter.Seq2[string, string] {
 	return func(yield func(string, string) bool) {
 		for i := 0; i < len(args); i += 2 {
 			var second string
