@@ -24,10 +24,12 @@ const usage = `Usage:
   aoc --day DAY --part PART [--year YEAR default: {{year}}] [--input INPUT default: input]
   aoc init --day DAY [--year YEAR default: {{year}}]
   aoc init <module>
+  aoc cache clear
 
 Commands:
   run (default)      Run a solution for a given day and part
   init               Initialize either a new AoC module or a new day
+  cache clear		 Clear solution runner cache
 
 Examples:
   aoc -d 1 -p 1                    # Run part 1 of day 1 for the default year ({{year}})
