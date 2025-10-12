@@ -9,7 +9,7 @@ import (
 	"github.com/gombrii/aoc/internal/gen"
 )
 
-const exit = `// Package exit does, in the spirit of Advent of Code, provide quick and dirty ways to fail 
+const exit = `// Package exit does, in the spirit of Advent of Code, provide quick and dirty ways to fail.
 package exit
 
 import (
@@ -33,14 +33,14 @@ func PanicIf(err error) {
 }`
 
 const input = `// Package input does, in the spirit of Advent of Code, provide some common ways to interpret the 
-// challanges' input data.
+// puzzles' input data.
 package parse
 
 import (
 	"strings"
 )
 
-// Lines converts data into text and returns it as a slice where each element represents a line.
+// Lines returns data as a slice of strings corresponding to the lines of text in the input data.
 func Lines(data []byte) []string {
 	return strings.Split(string(data), "\n")
 }
@@ -50,8 +50,8 @@ func String(data []byte) string {
 	return string(data)
 }
 
-// Matrix returns data as a matrix. The delimiter determines what in data separates columns 
-// while rows are seperated by linebreaks.
+// Matrix returns data as a matrix. The delimiter divides the data into separates columns while rows
+// correspond to the lines of text in the input data.
 func Matrix(data []byte, delimiter string) [][]string {
 	lines := strings.Split(strings.TrimSpace(string(data)), "\n")
 	matrix := make([][]string, len(lines))

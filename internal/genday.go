@@ -11,7 +11,7 @@ const part1 = `// Package {{.DayName}} solves puzzle available on https://advent
 package {{.DayName}}
 
 func Part1(data []byte) any {
-	//in := input.Lines(data)
+	//in := parse.Lines(data)
 
 	return "NOT IMPLEMENTED!"
 }`
@@ -20,7 +20,7 @@ const part2 = `// Package {{.DayName}} solves puzzle available on https://advent
 package {{.DayName}}
 
 func Part2(data []byte) any {
-	//in := input.Lines(data)
+	//in := parse.Lines(data)
 
 	return "NOT IMPLEMENTED!"
 }`
