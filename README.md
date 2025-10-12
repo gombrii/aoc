@@ -62,10 +62,13 @@ myaocproject/
 aoc --day DAY --part PART [--year YEAR] [--input INPUT]
 aoc init --day DAY [--year YEAR]
 aoc init <module>
+aoc cache clear
 
 Commands:
   run (default)      Run a solution for a given day and part
   init               Initialize either a new AoC module or a new day
+  cache clear		     Clear solution runner cache
+
 ```
 
 ```shell
@@ -127,6 +130,5 @@ At least in my mind, Advent of Code solutions are quick and dirty, thus don't ne
 - shared/exit — for exiting quickly in case of error (exit.If(err), exit.PanicIf(err))
 
 ## Roadmap
-- I will add command to clear cache
 - I will add unit tests to be able to guarantee stability
 - I might add a couple of more utilities for parsing input and maybe an iterator.
