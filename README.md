@@ -91,7 +91,7 @@ aoc init --day 3
     - If provided a mod name creates a mod file with your system's currently installed Go version as well as a couple of utility packages under `shared/` (can be removed if not needed).
     - If provided a day, eg. `-d 1`, creates the scaffolding for a new day's solutions and input.
 - The aoc run command (default):
-    1. Builds a temporary runner.
+    1. Builds a temporary runner or fetches from cache.
     1. Invokes the corresponding function.
     1. Prints the result and execution duration.
 
@@ -127,6 +127,6 @@ At least in my mind, Advent of Code solutions are quick and dirty, thus don't ne
 - shared/exit — for exiting quickly in case of error (exit.If(err), exit.PanicIf(err))
 
 ## Roadmap
+- I will add command to clear cache
 - I will add unit tests to be able to guarantee stability
 - I might add a couple of more utilities for parsing input and maybe an iterator.
-- One downside of this whole project is that the nature of generating temporary runners prevents the OS from applying common optimizations, such as caches. Currently, an AoC solution runs about 60-100% slower using this tool as compared to running it using the same binary again and again. Hopefully I can find some solutions in terms of warmup and preemptive memory allocations to mitigate this.
