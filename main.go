@@ -69,6 +69,7 @@ func main() {
 	case opInitAoc:
 		err = internal.GenAoc(in.module)
 	case opClearCache:
+		err = internal.ClearCache()
 	}
 
 	if err != nil {
