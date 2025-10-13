@@ -31,19 +31,19 @@ package {{.DayName}}`
 func GenDay(year, day string) error {
 	dayName := fmt.Sprintf("day%s", day)
 
-	data := map[string]string{
-		"Year":    year,
-		"Day":     day,
-		"DayName": dayName,
-	}
-
-	if err := gen.Files(data, map[string]string{
-		filepath.Join(year, "solutions", dayName, "part1.go"):  part1,
-		filepath.Join(year, "solutions", dayName, "part2.go"):  part2,
-		filepath.Join(year, "solutions", dayName, "common.go"): common,
-		filepath.Join(year, "input", dayName, "input.txt"):     "",
-		filepath.Join(year, "input", dayName, "test.txt"):      "",
-	}); err != nil {
+	if err := gen.Files(
+		map[string]string{
+			filepath.Join(year, "solutions", dayName, "part1.go"):  part1,
+			filepath.Join(year, "solutions", dayName, "part2.go"):  part2,
+			filepath.Join(year, "solutions", dayName, "common.go"): common,
+			filepath.Join(year, "input", dayName, "input.txt"):     "",
+			filepath.Join(year, "input", dayName, "test.txt"):      "",
+		},
+		map[string]string{
+			"Year":    year,
+			"Day":     day,
+			"DayName": dayName,
+		}); err != nil {
 		return fmt.Errorf("generating files: %v", err)
 	}
 

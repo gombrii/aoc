@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-func Files(data map[string]string, structure map[string]string) error {
+func Files(structure map[string]string, data map[string]string) error {
 	for fPath, tmpl := range structure {
 		if _, err := os.Stat(fPath); err == nil {
 			fmt.Printf("%s already exists", fPath)
@@ -31,4 +31,25 @@ func Files(data map[string]string, structure map[string]string) error {
 	}
 
 	return nil
+}
+
+func TempFiles(files map[string]string, data map[string]string) (map[string]string, error) {
+	tempFiles := make(map[string]string)
+
+	for fName, tmpl := range files {
+		file, err := os.CreateTemp("", "*")
+		if err != nil {
+			return nil, fmt.Errorf("creating temp file: %v", err)
+		}
+		defer file.Close()
+
+		if err = template.Must(template.New(fName).Parse(tmpl)).Execute(file, data); err != nil {
+			os.Remove(file.Name())
+			return nil, fmt.Errorf("compiling: %v", err)
+		}
+
+		tempFiles[fName] = file.Name()
+	}
+
+	return tempFiles, nil
 }

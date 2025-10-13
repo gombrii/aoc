@@ -71,10 +71,10 @@ func GenAoc(module string) error {
 		}
 	}
 
-	if err := gen.Files(nil, map[string]string{
+	if err := gen.Files(map[string]string{
 		filepath.Join("shared", "parse", "input.go"): input,
 		filepath.Join("shared", "exit", "error.go"):  exit,
-	}); err != nil {
+	}, nil); err != nil {
 		return fmt.Errorf("generating files: %v", err)
 	}
 
