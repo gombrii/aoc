@@ -62,7 +62,7 @@ func Run(year, day, part, input string) error {
 
 	mod, err := currentModulePath()
 	if err != nil {
-		return fmt.Errorf("starting runner: %v", err)
+		return fmt.Errorf("getting module name: %v", err)
 	}
 
 	path, err := getRunnerPath(year, day, part, input, map[string]string{
@@ -85,7 +85,7 @@ func Run(year, day, part, input string) error {
 func getRunnerPath(year, day, part, input string, data map[string]string) (string, error) {
 	cacheKey := fmt.Sprintf("%s-%s-%s-%s", year, day, part, input)
 
-	if cPath, ok := cache.Contains(cacheKey); ok {
+	if cPath, ok := cache.ContainsKey(cacheKey); ok {
 		return cPath, nil
 	}
 
@@ -94,7 +94,7 @@ func getRunnerPath(year, day, part, input string, data map[string]string) (strin
 		return "", fmt.Errorf("creating runner: %v", err)
 	}
 
-	cPath, err := cache.Store(cacheKey, rPath)
+	cPath, err := cache.Store(cacheKey, "runner.go", rPath)
 	if err != nil {
 		return "", fmt.Errorf("caching runner: %v", err)
 	}

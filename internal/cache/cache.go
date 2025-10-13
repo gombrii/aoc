@@ -11,7 +11,7 @@ func Location() (string, error) {
 	return filepath.Join(osCache, "aoc-cache"), nil
 }
 
-func Contains(key string) (string, bool) {
+func ContainsKey(key string) (string, bool) {
 	cache, _ := Location()
 	path := filepath.Join(cache, key)
 
@@ -22,10 +22,21 @@ func Contains(key string) (string, bool) {
 	return filepath.Join(path, "runner.go"), true
 }
 
-func Store(key string, src string) (string, error) {
+func Contains(key string, file string) (string, bool) {
+	cache, _ := Location()
+	path := filepath.Join(cache, key, file)
+
+	if _, err := os.Stat(path); err != nil {
+		return "", false
+	}
+
+	return path, true
+}
+
+func Store(key string, fileName string, src string) (string, error) {
 	cPath, _ := Location()
 	dPath := filepath.Join(cPath, key)
-	dst := filepath.Join(dPath, "runner.go")
+	dst := filepath.Join(dPath, fileName)
 
 	if _, err := os.Stat(src); err != nil {
 		return "", fmt.Errorf("checking existance src: %v", err)
