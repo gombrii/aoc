@@ -4,13 +4,15 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
-	"text/template"
 
 	"github.com/gombrii/aoc/internal/cache"
+	"github.com/gombrii/aoc/internal/gen"
 	"golang.org/x/mod/modfile"
 )
 
@@ -89,32 +91,28 @@ func getRunnerPath(year, day, part, input string, data map[string]string) (strin
 		return cPath, nil
 	}
 
-	rPath, err := createRunner(data)
+	files, err := gen.TempFiles(map[string]string{
+		"runner.go": runner,
+		"last":      "",
+		"lock":      "",
+		"dur":       strconv.Itoa(math.MaxInt64),
+	}, data)
 	if err != nil {
-		return "", fmt.Errorf("creating runner: %v", err)
+		return "", fmt.Errorf("generating files: %v", err)
 	}
 
-	cPath, err := cache.Store(cacheKey, "runner.go", rPath)
-	if err != nil {
-		return "", fmt.Errorf("caching runner: %v", err)
+	rPath := ""
+	for name, path := range files {
+		cPath, err := cache.Store(cacheKey, name, path)
+		if err != nil {
+			return "", fmt.Errorf("caching runner: %v", err)
+		}
+		if name == "runner.go" {
+			rPath = cPath
+		}
 	}
 
-	return cPath, nil
-}
-
-func createRunner(data map[string]string) (string, error) {
-	file, err := os.CreateTemp("", "runner-*")
-	if err != nil {
-		return "", fmt.Errorf("creating file: %v", err)
-	}
-	defer file.Close()
-
-	if err = template.Must(template.New("runner").Parse(runner)).Execute(file, data); err != nil {
-		os.Remove(file.Name())
-		return "", fmt.Errorf("compiling: %v", err)
-	}
-
-	return file.Name(), nil
+	return rPath, nil
 }
 
 func executeRunner(rPath string) error {
