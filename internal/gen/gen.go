@@ -2,9 +2,9 @@ package gen
 
 import (
 	"fmt"
-	"html/template"
 	"os"
 	"path/filepath"
+	"text/template"
 )
 
 func Files(structure map[string]string, data map[string]string) error {

@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gombrii/aoc/internal/cache"
 	"github.com/gombrii/aoc/internal/gen"
@@ -22,26 +23,54 @@ import (
 	"fmt"
 	"time"
 	"os"
+	"strconv"
+	"strings"
+	_ "embed"
 
 	"{{ .PkgPath }}"
 )
 
+//go:embed lock
+var lock string
+
+//go:embed res
+var res string
+
+//go:embed dur
+var dur string
+
 func main() {
+	locked, _ := strconv.ParseBool(strings.TrimSpace(lock))
+	record, _ := time.ParseDuration(strings.TrimSpace(dur))
 	data := read("{{ .InputPath }}")
+	
 	start := time.Now()
-	result := {{ .PkgName }}.{{ .FuncName }}(data)
-	dur := time.Since(start)
-	fmt.Println("Res:", result)
-	fmt.Println("Dur:", dur)
+	result := {{ .PkgName }}.{{ .FuncName }}(data)	
+	duration := time.Since(start)
+
+	correct := fmt.Sprint(result) == fmt.Sprint(strings.TrimSpace(res))
+	switch {
+	case locked && !correct:
+		fmt.Printf("Error: res: %v, want %v\n", result, res)
+		return
+	case locked && correct:
+		diff := duration - record
+		fmt.Println("Res:", result)
+		fmt.Printf("Dur: %v (%v, %.0f%%)\n", duration, diff, (float64(diff)/float64(duration))*100.0)
+		//TODO: Something about this writes even if new solution is slower
+		// And somehow things run kind of slow now.
+		if diff < 0 {
+			write("{{ .DurPath }}", fmt.Sprint(duration))
+		}
+	case !locked:
+		fmt.Println("Res:", result)
+		fmt.Println("Dur:", duration)
+		write("{{ .ResPath }}", fmt.Sprint(result))
+		write("{{ .DurPath }}", fmt.Sprint(duration))
+	}
 }
 	
 func read(path string) []byte {
-	_, err := os.Stat(path)
-	if err != nil {
-		fmt.Printf("Error: invalid file path: %v", err)
-		os.Exit(1)
-	}
-
 	data, err := os.ReadFile(path)
 	if err != nil {
 		fmt.Printf("Error: could not read file: %v", err)
@@ -49,6 +78,13 @@ func read(path string) []byte {
 	}
 
 	return data
+}
+	
+func write(path string, data string) {
+	if err := os.WriteFile(path, []byte(data), 0o644); err != nil {
+		fmt.Printf("Error: could not write file: %v\n", err)
+		os.Exit(1)
+	}
 }`
 
 func Run(year, day, part, input string) error {
@@ -67,11 +103,14 @@ func Run(year, day, part, input string) error {
 		return fmt.Errorf("getting module name: %v", err)
 	}
 
+	//TODO: Put data creation in getRunnerPath
 	path, err := getRunnerPath(year, day, part, input, map[string]string{
 		"PkgPath":   filepath.Join(mod, year, "solutions", day),
 		"PkgName":   day,
 		"FuncName":  strings.Replace(part, "p", "P", 1),
 		"InputPath": filepath.Join(year, "input", day, inputFile),
+		"ResPath": cache.MakePath(fmt.Sprintf("%s-%s-%s-%s", year, day, part, input), "res"),
+		"DurPath": cache.MakePath(fmt.Sprintf("%s-%s-%s-%s", year, day, part, input), "dur"),
 	})
 	if err != nil {
 		return fmt.Errorf("setting up runner: %v", err)
@@ -87,15 +126,15 @@ func Run(year, day, part, input string) error {
 func getRunnerPath(year, day, part, input string, data map[string]string) (string, error) {
 	cacheKey := fmt.Sprintf("%s-%s-%s-%s", year, day, part, input)
 
-	if cPath, ok := cache.ContainsKey(cacheKey); ok {
+	if cPath, ok := cache.Contains(cacheKey, "runner.go"); ok {
 		return cPath, nil
 	}
 
 	files, err := gen.TempFiles(map[string]string{
 		"runner.go": runner,
-		"last":      "",
-		"lock":      "",
-		"dur":       strconv.Itoa(math.MaxInt64),
+		"lock":      strconv.FormatBool(false),
+		"res":       "",
+		"dur":       time.Duration(math.MaxInt64).String(),
 	}, data)
 	if err != nil {
 		return "", fmt.Errorf("generating files: %v", err)

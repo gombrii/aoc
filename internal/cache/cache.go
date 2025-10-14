@@ -6,24 +6,18 @@ import (
 	"path/filepath"
 )
 
-func Location() (string, error) {
+func location() (string, error) {
 	osCache, _ := os.UserCacheDir()
 	return filepath.Join(osCache, "aoc-cache"), nil
 }
 
-func ContainsKey(key string) (string, bool) {
-	cache, _ := Location()
-	path := filepath.Join(cache, key)
-
-	if _, err := os.Stat(path); err != nil {
-		return "", false
-	}
-
-	return filepath.Join(path, "runner.go"), true
+func MakePath(key string, file string) string {
+	cache, _ := location()
+	return filepath.Join(cache, key, file)
 }
 
 func Contains(key string, file string) (string, bool) {
-	cache, _ := Location()
+	cache, _ := location()
 	path := filepath.Join(cache, key, file)
 
 	if _, err := os.Stat(path); err != nil {
@@ -34,7 +28,7 @@ func Contains(key string, file string) (string, bool) {
 }
 
 func Store(key string, fileName string, src string) (string, error) {
-	cPath, _ := Location()
+	cPath, _ := location()
 	dPath := filepath.Join(cPath, key)
 	dst := filepath.Join(dPath, fileName)
 
@@ -50,6 +44,6 @@ func Store(key string, fileName string, src string) (string, error) {
 }
 
 func Clear() error {
-	cache, _ := Location()
+	cache, _ := location()
 	return os.RemoveAll(cache)
 }
