@@ -25,40 +25,29 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	_ "embed"
 
 	"{{ .PkgPath }}"
 )
 
-//go:embed lock
-var lock string
-
-//go:embed res
-var res string
-
-//go:embed dur
-var dur string
-
 func main() {
-	locked, _ := strconv.ParseBool(strings.TrimSpace(lock))
-	record, _ := time.ParseDuration(strings.TrimSpace(dur))
+	locked, _ := strconv.ParseBool(strings.TrimSpace(string(read("{{ .LockPath }}"))))
+	record, _ := time.ParseDuration(strings.TrimSpace(string(read("{{ .DurPath }}"))))
+	lastRes := strings.TrimSpace(string(read("{{ .ResPath }}")))
 	data := read("{{ .InputPath }}")
 	
 	start := time.Now()
 	result := {{ .PkgName }}.{{ .FuncName }}(data)	
 	duration := time.Since(start)
 
-	correct := fmt.Sprint(result) == fmt.Sprint(strings.TrimSpace(res))
+	correct := fmt.Sprint(result) == lastRes
 	switch {
 	case locked && !correct:
-		fmt.Printf("Error: res: %v, want %v\n", result, res)
+		fmt.Printf("Error: res: %v, want %v\n", result, lastRes)
 		return
 	case locked && correct:
 		diff := duration - record
 		fmt.Println("Res:", result)
 		fmt.Printf("Dur: %v (%v, %.0f%%)\n", duration, diff, (float64(diff)/float64(duration))*100.0)
-		//TODO: Something about this writes even if new solution is slower
-		// And somehow things run kind of slow now.
 		if diff < 0 {
 			write("{{ .DurPath }}", fmt.Sprint(duration))
 		}
@@ -81,7 +70,7 @@ func read(path string) []byte {
 }
 	
 func write(path string, data string) {
-	if err := os.WriteFile(path, []byte(data), 0o644); err != nil {
+	if err := os.WriteFile(path, []byte(data), 0755); err != nil {
 		fmt.Printf("Error: could not write file: %v\n", err)
 		os.Exit(1)
 	}
@@ -90,28 +79,14 @@ func write(path string, data string) {
 func Run(year, day, part, input string) error {
 	day = fmt.Sprintf("day%s", day)
 	part = fmt.Sprintf("part%s", part)
-	inputFile := fmt.Sprintf("%s.txt", input)
 
 	if _, err := os.Stat(filepath.Join(year, "solutions", day, fmt.Sprintf("%s.go", part))); err != nil {
 		return fmt.Errorf("%v does not exist", filepath.Join(year, day, part))
 	}
 
-	fmt.Printf("Running %s with %s\n", filepath.Join(year, day, part), inputFile)
+	fmt.Printf("Running %s with %s\n", filepath.Join(year, day, part), fmt.Sprintf("%s.txt", input))
 
-	mod, err := currentModulePath()
-	if err != nil {
-		return fmt.Errorf("getting module name: %v", err)
-	}
-
-	//TODO: Put data creation in getRunnerPath
-	path, err := getRunnerPath(year, day, part, input, map[string]string{
-		"PkgPath":   filepath.Join(mod, year, "solutions", day),
-		"PkgName":   day,
-		"FuncName":  strings.Replace(part, "p", "P", 1),
-		"InputPath": filepath.Join(year, "input", day, inputFile),
-		"ResPath": cache.MakePath(fmt.Sprintf("%s-%s-%s-%s", year, day, part, input), "res"),
-		"DurPath": cache.MakePath(fmt.Sprintf("%s-%s-%s-%s", year, day, part, input), "dur"),
-	})
+	path, err := getRunnerPath(year, day, part, input)
 	if err != nil {
 		return fmt.Errorf("setting up runner: %v", err)
 	}
@@ -123,11 +98,16 @@ func Run(year, day, part, input string) error {
 	return nil
 }
 
-func getRunnerPath(year, day, part, input string, data map[string]string) (string, error) {
+func getRunnerPath(year, day, part, input string) (string, error) {
 	cacheKey := fmt.Sprintf("%s-%s-%s-%s", year, day, part, input)
 
 	if cPath, ok := cache.Contains(cacheKey, "runner.go"); ok {
 		return cPath, nil
+	}
+
+	mod, err := currentModulePath()
+	if err != nil {
+		return "", fmt.Errorf("getting module name: %v", err)
 	}
 
 	files, err := gen.TempFiles(map[string]string{
@@ -135,7 +115,15 @@ func getRunnerPath(year, day, part, input string, data map[string]string) (strin
 		"lock":      strconv.FormatBool(false),
 		"res":       "",
 		"dur":       time.Duration(math.MaxInt64).String(),
-	}, data)
+	}, map[string]string{
+		"PkgPath":   filepath.Join(mod, year, "solutions", day),
+		"PkgName":   day,
+		"FuncName":  strings.Replace(part, "p", "P", 1),
+		"InputPath": filepath.Join(year, "input", day, fmt.Sprintf("%s.txt", input)),
+		"LockPath":  cache.MakePath(cacheKey, "lock"),
+		"ResPath":   cache.MakePath(cacheKey, "res"),
+		"DurPath":   cache.MakePath(cacheKey, "dur"),
+	})
 	if err != nil {
 		return "", fmt.Errorf("generating files: %v", err)
 	}
