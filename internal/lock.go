@@ -11,8 +11,6 @@ import (
 	"github.com/gombrii/aoc/internal/files"
 )
 
-//TODO: Should I have Some package responsible for writing and reading files?
-
 func Status(year, day, part, input string) error {
 	key := cache.Key(year, fmt.Sprint("day", day), fmt.Sprint("part", part), input)
 

@@ -5,11 +5,11 @@
 
 # Advent of Code CLI (`aoc`)
 
-A simple command-line tool to streamline your **Advent of Code** workflow in **Go**, from scaffolding new solutions to running them with input data.  
+A command-line tool to streamline your **Advent of Code** workflow in **Go**, from scaffolding new solutions to running them with input data, chasing better solutions and execution times.  
 It handles project setup, day initialization, and execution of specific parts with minimal friction.
-> That was the professional pitch. I wrote the same kind of functionality last year, but as part of my actual Advent of Code repository. I just thought it'd be neat to keep the facilitation of AoC challenges as a standalone app, separate from the actual challenges, hence this.
+> Last year I wrote something similar to this, albeit much simpler, in my AoC repo. Now I thought it'd be neat to keep the facilitation of AoC challenges as a standalone app, separate from the actual challenges, hence this.
 >
-> The goal of this application is to impose upon the user as little as possible and let the user run and write his/her own solutions along with any helper code. The app only provides a simple way to structure and run the solutions without needing to juggle multiple binaries.
+> The goal of this application is to impose upon the user as little as possible and let the user run and write his/her own solutions along with any helper code. This app, in its core, only provides a simple way to structure and run the solutions without needing to juggle multiple binaries.
 
 ## Features
 
@@ -17,7 +17,9 @@ It handles project setup, day initialization, and execution of specific parts wi
 - **Initialize** a new AoC module with shared helpers (`input`, `exit`, etc.)
 - **Scaffold** new solution files for specific days automatically
 - **Auto-detects the current Advent of Code year**, defaulting to the year of the most recently started Advent of Code
-- Generates minimal boilerplate code to get started quickly
+- **Generate** minimal boilerplate code to get started quickly
+- **Lock down** correct answers and use aoc as a test tool to find better puzzle solutions.
+- **Chase fast execution times** with execution duration memory
 
 ## Getting started
 
@@ -59,16 +61,22 @@ myaocproject/
 ```
 ## Usage
 ```
-aoc --day DAY --part PART [--year YEAR] [--input INPUT]
-aoc init --day DAY [--year YEAR]
+aoc [run] --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
+aoc init --day DAY [--year YEAR default: {{year}}]
 aoc init <module>
 aoc cache clear
+aoc status --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
+aoc lock   --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
+aoc unlock --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
+aoc help
 
 Commands:
-  run (default)      Run a solution for a given day and part
-  init               Initialize either a new AoC module or a new day
-  cache clear		     Clear solution runner cache
-
+  run (default)         Run solution for a given day and part
+  init                  Initialize an AoC module or a new day
+  status                Show cached status for a specific puzzle
+  lock                  Lock the result for a specific puzzle
+  unlock                Unlock the result for a specific puzzle
+  cache clear           Clear puzzle solutions cache
 ```
 
 ```shell
@@ -110,7 +118,7 @@ func Part1(data []byte) any {
 }
 ```
 
-This is where you write your puzzle solution. The puzzle input is provided as raw bytes. To simplify life, the puzzle solution is returned as is, without needing any type conversion, and then printed to the command line. Every initiated day's solution catalogue also gets a `common.go` file, which is simply a convenient place to store code that might be useful for both parts of the challenge.
+This is where you write your puzzle solution. The puzzle input is provided as raw bytes. To simplify life, the puzzle solution can be returned as is, without needing any type conversion, after which it's printed to the command line. Every initiated day's solution catalogue also gets a `common.go` file, which is simply a convenient place to store code that might be useful for both parts of the challenge.
 
 How running a puzzle looks:
 ```shell
@@ -120,9 +128,14 @@ Res: 2970687
 Dur: 304µs
 ```
 
-"Res" is whatever was returned from the PartX function and "Dur" is the time measured from the moment the PartX function was called to the moment after it returned. The loading of the puzzle input file data happens before time starts recording. No printing (for debug purposes or otherwise) will interfere with anything, so feel free to do so. Prints will simply appear between "Running year/dayX/partX with X.txt" and the "Res" and "Dur" statements.
+"Res" is whatever was returned from the PartX function and "Dur" is the time measured from the moment the PartX function was called to the moment after it returned. The loading of the puzzle input file data happens before time starts recording. Printing (for debug purposes or otherwise) will not interfere with anything, so feel free to do so. Prints will simply appear between "Running year/dayX/partX with X.txt" and the "Res" and "Dur" statements.
 
 Every initiated day's input catalogue gets two empty text files (`input.txt`, `test.txt`) into which you copy paste that day's puzzle input. Run with `-i` to run the puzzle with a specific input file, eg. `aoc -d 1 -p 2 -i test` to run with `test.txt`. The default is `input`, which runs the puzzle with `input.txt`. If the challenge presents more than one test input, simply create more test input files.
+
+### Locking
+Aoc remembers the results and durations of each solution's last run. Locking a solution does two things. It locks down the result for that solution so that it's not overwritten and it sees so that the duration for the solution only updates if it's shorter than the shortest recorded duration while the solution was locked. While the solution is locked aoc will also return an error if a change to the solution would return a different result than when it was locked.
+
+The typical usecase for locking a solution is after a correct result has been achieved. Often the first solution is sloppy or naïve. When the solution is locked it gives you the oppertunity to experiment and polish your solution and compare results, while getting clear feedback when something has gone wrong. Effectively you've turned your puzzle solution into a simple unit test and performance test testing itself. 
 
 ### Utilities
 At least in my mind, Advent of Code solutions are quick and dirty, thus don't need proper code hygiene. To achieve that, two helper packages are included when initiating the module:
@@ -130,6 +143,7 @@ At least in my mind, Advent of Code solutions are quick and dirty, thus don't ne
 - shared/exit — for exiting quickly in case of error (exit.If(err), exit.PanicIf(err))
 
 ## Roadmap
+- Add feature to check that all locked solutions still give the same result
 - I will add unit tests to be able to guarantee stability
 - I might add a couple of more utilities for parsing input and maybe an iterator.
 - New _completely optional_ function to be able to "lock in" correct puzzle results to make it easier to iterate on a solution without risking making it invalid. It will be almost like the first successful solution to a puzzle becomes a unit test against which to test further iterations. I wasn't planning on adding any new large features because I _don't_ want feature creep. But I think this will be really cool, it won't even be noticed if not actively used, and it does not force or even nudge the user to use it.

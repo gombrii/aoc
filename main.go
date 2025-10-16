@@ -17,28 +17,40 @@ const (
 	opInit       = "init"
 	opInitAoc    = "initAoc"
 	opInitDay    = "initDay"
-	opClearCache = "clarCache"
+	opClearCache = "clearCache"
 	opStatus     = "status"
 	opLock       = "lock"
 	opUnlock     = "unlock"
 )
 
 const usage = `Usage:
-  aoc --day DAY --part PART [--year YEAR default: {{year}}] [--input INPUT default: input]
+  aoc [run] --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
   aoc init --day DAY [--year YEAR default: {{year}}]
   aoc init <module>
   aoc cache clear
+  aoc status --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
+  aoc lock   --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
+  aoc unlock --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
+  aoc help
 
 Commands:
-  run (default)      Run a solution for a given day and part
-  init               Initialize either a new AoC module or a new day
-  cache clear		 Clear solution runner cache
+  run (default)         Run solution for a given day and part
+  init                  Initialize an AoC module or a new day
+  status                Show cached status for a specific puzzle
+  lock                  Lock the result for a specific puzzle
+  unlock                Unlock the result for a specific puzzle
+  cache clear           Clear puzzle solutions cache
 
 Examples:
-  aoc -d 1 -p 1                    # Run part 1 of day 1 for the default year ({{year}})
+  aoc -d 1 -p 1                    # Run part 1 of day 1 with "input.txt" for the default year ({{year}})
   aoc -y 2023 -d 5 -p 2 -i test    # Run part 2 of day 5 year 2023 using input file "test.txt"
   aoc init mymodule                # Initialize a new AoC module named mymodule (creates project structure)
-  aoc init --day 3                 # Initialize solution files for day 3 for the default year ({{year}})`
+  aoc init --day 3                 # Initialize solution files for day 3 for the default year ({{year}})
+  aoc status -d 1 -p 2             # Show status for solution {{year}} day 1 part 2 with input.txt
+  aoc lock -d 2 -p 1               # Lock the result for {{year}} day 2 part 1 with input.txt
+  aoc unlock -d 2 -p 1             # Unlock the result for {{year}} day 1 part 2 with input.txt
+  aoc cache clear                  # Clear cache (runners, results, execution times, locks)
+`
 
 type input struct {
 	op     string
