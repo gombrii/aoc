@@ -61,13 +61,13 @@ myaocproject/
 ```
 ## Usage
 ```
-aoc [run] --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
-aoc init --day DAY [--year YEAR default: {{year}}]
+aoc [run] --day DAY --part {1|2} [--year YEAR default: curr AoC year] [--input INPUT default: input]
+aoc init --day DAY [--year YEAR default: curr AoC year]
 aoc init <module>
+aoc status --day DAY --part {1|2} [--year YEAR default: curr AoC year] [--input INPUT default: input]
+aoc lock   --day DAY --part {1|2} [--year YEAR default: curr AoC year] [--input INPUT default: input]
+aoc unlock --day DAY --part {1|2} [--year YEAR default: curr AoC year] [--input INPUT default: input]
 aoc cache clear
-aoc status --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
-aoc lock   --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
-aoc unlock --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
 aoc help
 
 Commands:
@@ -77,6 +77,7 @@ Commands:
   lock                  Lock the result for a specific puzzle
   unlock                Unlock the result for a specific puzzle
   cache clear           Clear puzzle solutions cache
+  help                  Print this
 ```
 
 ```shell
@@ -146,4 +147,3 @@ At least in my mind, Advent of Code solutions are quick and dirty, thus don't ne
 - Add feature to check that all locked solutions still give the same result
 - I will add unit tests to be able to guarantee stability
 - I might add a couple of more utilities for parsing input and maybe an iterator.
-- New _completely optional_ function to be able to "lock in" correct puzzle results to make it easier to iterate on a solution without risking making it invalid. It will be almost like the first successful solution to a puzzle becomes a unit test against which to test further iterations. I wasn't planning on adding any new large features because I _don't_ want feature creep. But I think this will be really cool, it won't even be noticed if not actively used, and it does not force or even nudge the user to use it.

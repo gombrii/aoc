@@ -27,10 +27,10 @@ const usage = `Usage:
   aoc [run] --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
   aoc init --day DAY [--year YEAR default: {{year}}]
   aoc init <module>
-  aoc cache clear
   aoc status --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
   aoc lock   --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
   aoc unlock --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
+  aoc cache clear
   aoc help
 
 Commands:
@@ -40,6 +40,7 @@ Commands:
   lock                  Lock the result for a specific puzzle
   unlock                Unlock the result for a specific puzzle
   cache clear           Clear puzzle solutions cache
+  help                  Print this
 
 Examples:
   aoc -d 1 -p 1                    # Run part 1 of day 1 with "input.txt" for the default year ({{year}})
