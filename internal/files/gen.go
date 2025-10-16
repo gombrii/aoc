@@ -1,4 +1,4 @@
-package gen
+package files
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"text/template"
 )
 
-func Files(structure map[string]string, data map[string]string) error {
+func Gen(structure map[string]string, data map[string]string) error {
 	for fPath, tmpl := range structure {
 		if _, err := os.Stat(fPath); err == nil {
 			fmt.Printf("%s already exists", fPath)
@@ -33,7 +33,7 @@ func Files(structure map[string]string, data map[string]string) error {
 	return nil
 }
 
-func TempFiles(files map[string]string, data map[string]string) (map[string]string, error) {
+func GenTemp(files map[string]string, data map[string]string) (map[string]string, error) {
 	tempFiles := make(map[string]string)
 
 	for fName, tmpl := range files {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/gombrii/aoc/internal/gen"
+	"github.com/gombrii/aoc/internal/files"
 )
 
 const part1 = `// Package {{.DayName}} solves puzzle available on https://adventofcode.com/{{.Year}}/day/{{.Day}}
@@ -31,7 +31,7 @@ package {{.DayName}}`
 func GenDay(year, day string) error {
 	dayName := fmt.Sprintf("day%s", day)
 
-	if err := gen.Files(
+	if err := files.Gen(
 		map[string]string{
 			filepath.Join(year, "solutions", dayName, "part1.go"):  part1,
 			filepath.Join(year, "solutions", dayName, "part2.go"):  part2,

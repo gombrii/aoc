@@ -12,8 +12,6 @@ import (
 	"github.com/gombrii/aoc/internal"
 )
 
-//TODO: Now add commands lock, unlock and status/locked
-
 const (
 	opRun        = "run"
 	opInit       = "init"

@@ -8,37 +8,40 @@ import (
 	"strings"
 
 	"github.com/gombrii/aoc/internal/cache"
+	"github.com/gombrii/aoc/internal/files"
 )
 
-func Status(year, day, part, input string) error {
-	cacheKey := cache.Key(year, fmt.Sprint("day", day), fmt.Sprint("part", part), input)
+//TODO: Should I have Some package responsible for writing and reading files?
 
-	if _, exists := cache.ContainsKey(cacheKey); !exists {
+func Status(year, day, part, input string) error {
+	key := cache.Key(year, fmt.Sprint("day", day), fmt.Sprint("part", part), input)
+
+	if _, exists := cache.ContainsKey(key); !exists {
 		fmt.Printf("No record of running %s with %s\n", filepath.Join(year, day, part), fmt.Sprintf("%s.txt", input))
 		return nil
 	}
 
-	data, err := readAll(map[string]string{
-		"lock": cache.MakePath(cacheKey, "lock"),
-		"res":  cache.MakePath(cacheKey, "res"),
-		"dur":  cache.MakePath(cacheKey, "dur"),
+	data, err := files.ReadAll(map[string]string{
+		files.Lock: cache.MakePath(key, files.Lock),
+		files.Res:  cache.MakePath(key, files.Res),
+		files.Dur:  cache.MakePath(key, files.Dur),
 	})
 	if err != nil {
 		return err
 	}
 
-	locked, _ := strconv.ParseBool(strings.TrimSpace(data["lock"]))
+	locked, _ := strconv.ParseBool(strings.TrimSpace(data[files.Lock]))
 
 	if locked {
 		fmt.Printf(`▣ Locked
 Lock res: %s
 Best dur: %s
-`, data["res"], data["dur"])
+`, data[files.Res], data[files.Dur])
 	} else {
 		fmt.Printf(`□ Unlocked
 Last res: %s
 Last dur: %s
-`, data["res"], data["dur"])
+`, data[files.Res], data[files.Dur])
 	}
 
 	return nil
@@ -77,31 +80,17 @@ func setLock(lock bool, year, day, part, input string) (res, dur string, err err
 		return "", "", nil
 	}
 
-	data, err := readAll(map[string]string{
-		"res": cache.MakePath(cacheKey, "res"),
-		"dur": cache.MakePath(cacheKey, "dur"),
+	data, err := files.ReadAll(map[string]string{
+		files.Res: cache.MakePath(cacheKey, files.Res),
+		files.Dur: cache.MakePath(cacheKey, files.Dur),
 	})
 	if err != nil {
 		return "", "", err
 	}
 
-	if err := os.WriteFile(cache.MakePath(cacheKey, "lock"), []byte(strconv.FormatBool(lock)), 0755); err != nil {
+	if err := os.WriteFile(cache.MakePath(cacheKey, files.Lock), []byte(strconv.FormatBool(lock)), 0755); err != nil {
 		return "", "", fmt.Errorf("writing to file: %v", err)
 	}
 
-	return data["res"], data["dur"], nil
-}
-
-func readAll(files map[string]string) (map[string]string, error) {
-	data := make(map[string]string, len(files))
-
-	for name, path := range files {
-		bytes, err := os.ReadFile(path)
-		if err != nil {
-			return nil, fmt.Errorf("reading file: %v", err)
-		}
-		data[name] = string(bytes)
-	}
-
-	return data, nil
+	return data[files.Res], data[files.Dur], nil
 }

@@ -13,11 +13,11 @@ import (
 	"time"
 
 	"github.com/gombrii/aoc/internal/cache"
-	"github.com/gombrii/aoc/internal/gen"
+	"github.com/gombrii/aoc/internal/files"
 	"golang.org/x/mod/modfile"
 )
 
-const runner = `package main
+const runnerTmpl = `package main
 
 import (
 	"fmt"
@@ -101,7 +101,7 @@ func Run(year, day, part, input string) error {
 func getRunnerPath(year, day, part, input string) (string, error) {
 	cacheKey := cache.Key(year, day, part, input)
 
-	if cPath, ok := cache.Contains(cacheKey, "runner.go"); ok {
+	if cPath, ok := cache.Contains(cacheKey, files.Runner); ok {
 		return cPath, nil
 	}
 
@@ -110,31 +110,31 @@ func getRunnerPath(year, day, part, input string) (string, error) {
 		return "", fmt.Errorf("getting module name: %v", err)
 	}
 
-	files, err := gen.TempFiles(map[string]string{
-		"runner.go": runner,
-		"lock":      strconv.FormatBool(false),
-		"res":       "",
-		"dur":       time.Duration(math.MaxInt64).String(),
+	fPaths, err := files.GenTemp(map[string]string{
+		files.Runner: runnerTmpl,
+		files.Lock:   strconv.FormatBool(false),
+		files.Res:    "",
+		files.Dur:    time.Duration(math.MaxInt64).String(),
 	}, map[string]string{
 		"PkgPath":   filepath.Join(mod, year, "solutions", day),
 		"PkgName":   day,
 		"FuncName":  strings.Replace(part, "p", "P", 1),
 		"InputPath": filepath.Join(year, "input", day, fmt.Sprintf("%s.txt", input)),
-		"LockPath":  cache.MakePath(cacheKey, "lock"),
-		"ResPath":   cache.MakePath(cacheKey, "res"),
-		"DurPath":   cache.MakePath(cacheKey, "dur"),
+		"LockPath":  cache.MakePath(cacheKey, files.Lock),
+		"ResPath":   cache.MakePath(cacheKey, files.Res),
+		"DurPath":   cache.MakePath(cacheKey, files.Dur),
 	})
 	if err != nil {
 		return "", fmt.Errorf("generating files: %v", err)
 	}
 
 	rPath := ""
-	for name, path := range files {
+	for name, path := range fPaths {
 		cPath, err := cache.Store(cacheKey, name, path)
 		if err != nil {
-			return "", fmt.Errorf("caching runner: %v", err)
+			return "", fmt.Errorf("caching files: %v", err)
 		}
-		if name == "runner.go" {
+		if name == files.Runner {
 			rPath = cPath
 		}
 	}
@@ -142,8 +142,8 @@ func getRunnerPath(year, day, part, input string) (string, error) {
 	return rPath, nil
 }
 
-func executeRunner(rPath string) error {
-	cmd := exec.Command("go", "run", rPath)
+func executeRunner(path string) error {
+	cmd := exec.Command("go", "run", path)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin

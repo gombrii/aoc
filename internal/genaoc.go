@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/gombrii/aoc/internal/gen"
+	"github.com/gombrii/aoc/internal/files"
 )
 
 const exit = `// Package exit does, in the spirit of Advent of Code, provide quick and dirty ways to fail.
@@ -71,7 +71,7 @@ func GenAoc(module string) error {
 		}
 	}
 
-	if err := gen.Files(map[string]string{
+	if err := files.Gen(map[string]string{
 		filepath.Join("shared", "parse", "input.go"): input,
 		filepath.Join("shared", "exit", "error.go"):  exit,
 	}, nil); err != nil {
