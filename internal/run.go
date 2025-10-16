@@ -99,7 +99,7 @@ func Run(year, day, part, input string) error {
 }
 
 func getRunnerPath(year, day, part, input string) (string, error) {
-	cacheKey := fmt.Sprintf("%s-%s-%s-%s", year, day, part, input)
+	cacheKey := cache.Key(year, day, part, input)
 
 	if cPath, ok := cache.Contains(cacheKey, "runner.go"); ok {
 		return cPath, nil

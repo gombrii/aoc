@@ -11,9 +11,25 @@ func location() (string, error) {
 	return filepath.Join(osCache, "aoc-cache"), nil
 }
 
+func Key(year, day, part, input string) string {
+	//TODO: Maybe take year, day and part as ints and construct everything here.
+	return fmt.Sprintf("%s-%s-%s-%s", year, day, part, input)
+}
+
 func MakePath(key string, file string) string {
 	cache, _ := location()
 	return filepath.Join(cache, key, file)
+}
+
+func ContainsKey(key string) (string, bool) {
+	cache, _ := location()
+	path := filepath.Join(cache, key)
+
+	if _, err := os.Stat(path); err != nil {
+		return "", false
+	}
+
+	return path, true
 }
 
 func Contains(key string, file string) (string, bool) {

@@ -12,12 +12,17 @@ import (
 	"github.com/gombrii/aoc/internal"
 )
 
+//TODO: Now add commands lock, unlock and status/locked
+
 const (
 	opRun        = "run"
 	opInit       = "init"
 	opInitAoc    = "initAoc"
 	opInitDay    = "initDay"
 	opClearCache = "clarCache"
+	opStatus     = "status"
+	opLock       = "lock"
+	opUnlock     = "unlock"
 )
 
 const usage = `Usage:
@@ -72,6 +77,12 @@ func main() {
 		err = internal.GenAoc(in.module)
 	case opClearCache:
 		err = internal.ClearCache()
+	case opStatus:
+		err = internal.Status(in.year, in.day, in.part, in.input)
+	case opLock:
+		err = internal.Lock(in.year, in.day, in.part, in.input)
+	case opUnlock:
+		err = internal.Unock(in.year, in.day, in.part, in.input)
 	}
 
 	if err != nil {
@@ -84,10 +95,10 @@ func parseInput(args []string) (input, error) {
 	i := 1
 
 	switch args[i] {
-	case "init":
-		in.op = opInit
+	case opInit, opStatus, opLock, opUnlock:
+		in.op = args[i]
 		i++
-	case "run":
+	case opRun:
 		i++
 	case "cache":
 		if len(args) > 2 && args[i+1] == "clear" {
