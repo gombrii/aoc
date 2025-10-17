@@ -143,7 +143,12 @@ At least in my mind, Advent of Code solutions are quick and dirty, thus don't ne
 - shared/input — for parsing input data into common formats (Lines, String, Matrix, etc.)
 - shared/exit — for exiting quickly in case of error (exit.If(err), exit.PanicIf(err))
 
-## Roadmap
-- Add feature to check that all locked solutions still give the same result
-- I will add unit tests to be able to guarantee stability
+## Author's notes
+### Feature additions
+- I will probably add feature to check that all locked solutions still give the same result. That way it enables the user to adjust shared code and still check that all solutions work correctly.
 - I might add a couple of more utilities for parsing input and maybe an iterator.
+- I'll probably add one or two printing utilities for matrices. Writing one's own matrix printing loop isn't the most fun thing in the world just to make a debug print.
+### Technical debt
+- Unit tests to be able to guarantee stability.
+- Better app input (cli args). Right now it works, but it's kind of a mess and needs better input validation.
+- Think a little about feature creep and if the app still fits within the original scope.
