@@ -13,44 +13,40 @@ import (
 )
 
 const (
-	opRun        = "run"
-	opInit       = "init"
-	opInitAoc    = "initAoc"
-	opInitDay    = "initDay"
-	opClearCache = "clearCache"
-	opStatus     = "status"
-	opLock       = "lock"
-	opUnlock     = "unlock"
+	opPuzzleRun    = "puzzle run"
+	opPuzzleStatus = "puzzle status"
+	opPuzzleLock   = "puzzle lock"
+	opPuzzleUnlock = "puzzle unlock"
+	opInitModule   = "init -m"
+	opInitDay      = "init -d"
+	opCacheClear   = "cache clear"
 )
 
 const usage = `Usage:
-  aoc [run] --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
-  aoc init --day DAY [--year YEAR default: {{year}}]
-  aoc init <module>
-  aoc status --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
-  aoc lock   --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
-  aoc unlock --day DAY --part {1|2} [--year YEAR default: {{year}}] [--input INPUT default: input]
+  aoc [puzzle run] <params>
+  aoc puzzle {run|status|lock|unlock} -d DAY -p {1|2} [-y YEAR default: {{year}}] [-i INPUT default: input.txt]
+  aoc init   {-d DAY [-y YEAR] | -m MODULE_NAME}
   aoc cache clear
-  aoc help
+  aoc help [command]
 
-Commands:
-  run (default)         Run solution for a given day and part
-  init                  Initialize an AoC module or a new day
-  status                Show cached status for a specific puzzle
-  lock                  Lock the result for a specific puzzle
-  unlock                Unlock the result for a specific puzzle
-  cache clear           Clear puzzle solutions cache
-  help                  Print this
+Puzzle commands:
+  run          Execute a puzzle (default when no subcommand is given)
+  status       Show result and duration of last run of puzzle
+  lock         Lock result; future runs error if they deviate; keep fastest duration
+  unlock       Unlock result; remember only last run
 
-Examples:
-  aoc -d 1 -p 1                    # Run part 1 of day 1 with "input.txt" for the default year ({{year}})
-  aoc -y 2023 -d 5 -p 2 -i test    # Run part 2 of day 5 year 2023 using input file "test.txt"
-  aoc init mymodule                # Initialize a new AoC module named mymodule (creates project structure)
-  aoc init --day 3                 # Initialize solution files for day 3 for the default year ({{year}})
-  aoc status -d 1 -p 2             # Show status for solution {{year}} day 1 part 2 with input.txt
-  aoc lock -d 2 -p 1               # Lock the result for {{year}} day 2 part 1 with input.txt
-  aoc unlock -d 2 -p 1             # Unlock the result for {{year}} day 1 part 2 with input.txt
-  aoc cache clear                  # Clear cache (runners, results, execution times, locks)
+Project setup:
+  init --day       Scaffold solution files for a day
+  init --module    Create a new AoC module structure
+
+Misc:
+  cache clear      Clear cached runners and metadata
+  help             Show this or command-specific help
+
+Concepts:
+  • Puzzle = (year, day, part, input).
+  • Locked puzzles act like tests: runs must match locked results.
+  • Input files must include their extension (e.g. test.txt).
 `
 
 type input struct {
@@ -68,110 +64,122 @@ func main() {
 		return
 	}
 
-	in, err := parseInput(os.Args)
+	in, err := parseInput(os.Args[1:])
 	if err != nil {
 		fmt.Println("Error:", err)
-		return
+		os.Exit(2)
 	}
 
 	if err := validate(in); err != nil {
 		fmt.Println("Error:", err)
-		return
+		os.Exit(2)
 	}
 
 	switch in.op {
-	case opRun:
+	case opPuzzleRun:
 		err = internal.Run(in.year, in.day, in.part, in.input)
+	case opPuzzleStatus:
+		err = internal.Status(in.year, in.day, in.part, in.input)
+	case opPuzzleLock:
+		err = internal.Lock(in.year, in.day, in.part, in.input)
+	case opPuzzleUnlock:
+		err = internal.Unlock(in.year, in.day, in.part, in.input)
 	case opInitDay:
 		err = internal.GenDay(in.year, in.day)
-	case opInitAoc:
+	case opInitModule:
 		err = internal.GenAoc(in.module)
-	case opClearCache:
+	case opCacheClear:
 		err = internal.ClearCache()
-	case opStatus:
-		err = internal.Status(in.year, in.day, in.part, in.input)
-	case opLock:
-		err = internal.Lock(in.year, in.day, in.part, in.input)
-	case opUnlock:
-		err = internal.Unock(in.year, in.day, in.part, in.input)
 	}
 
 	if err != nil {
 		fmt.Println("Error:", err)
+		os.Exit(2)
 	}
 }
 
 func parseInput(args []string) (input, error) {
 	in := defaultInput()
-	i := 1
+	op := make([]string, 0)
 
-	switch args[i] {
-	case opInit, opStatus, opLock, opUnlock:
-		in.op = args[i]
-		i++
-	case opRun:
-		i++
-	case "cache":
-		if len(args) > 2 && args[i+1] == "clear" {
-			in.op = opClearCache
-			return in, nil
+	i := 0
+	for j, arg := range args {
+		fmt.Println("i:", i, "arg:", arg)
+		i = j
+		if strings.HasPrefix(arg, "-") {
+			break
 		}
+		op = append(op, arg)
 	}
+	fmt.Println("i:", i)
 
 	for param, val := range paramVals(args[i:]) {
+		fmt.Println("i:", i, "p:", param, "v:", val)
+		//if val == "" || strings.HasPrefix(val, "-") {
+		//	return input{}, fmt.Errorf("invalid argument %q to param %s", val, param)
+		//}
+
 		switch param {
 		case "-y", "--year":
 			in.year = val
 		case "-d", "--day":
 			in.day = val
-			if in.op == opInit {
-				in.op = opInitDay
-			}
 		case "-p", "--part":
 			in.part = val
 		case "-i", "--input":
 			in.input = val
+		case "-m", "--module":
+			in.module = val
 		default:
-			if in.op != opInit {
-				if strings.HasPrefix(param, "-") {
-					return input{}, fmt.Errorf("unknown parameter %q", param)
-				}
-				return input{}, fmt.Errorf("loose argument %q", param)
-			}
-			in.module = param
-			in.op = opInitAoc
+			//if strings.HasPrefix(param, "-") {
+			//	return input{}, fmt.Errorf("unknown parameter %q", param)
+			//}
+			//return input{}, fmt.Errorf("loose argument %q", param)
 		}
+	}
+
+	if len(op) > 0 && op[0] == "init" {
+		if in.module != "" {
+			op = append(op, "-m")
+		} else if in.day != "" {
+			op = append(op, "-d")
+		} else {
+			return input{}, errors.New("ambiguous call to init, no -d or -m arguments passed")
+		}
+	}
+
+	if len(op) > 0 {
+		in.op = strings.Join(op, " ")
 	}
 
 	return in, nil
 }
 
-func validate(input input) error {
-	switch input.op {
-	case opInitAoc:
-		if input.module == "" {
-			return errors.New("no module name provided")
+func validate(in input) error {
+	switch in.op {
+	case opPuzzleRun, opPuzzleStatus, opPuzzleLock, opPuzzleUnlock:
+		if _, err := strconv.Atoi(in.year); err != nil {
+			return fmt.Errorf("year %q must be a number", in.year)
 		}
-	case opRun:
-		if input.part == "" {
-			return errors.New("no part (-p) provided")
+		if _, err := strconv.Atoi(in.day); err != nil {
+			return fmt.Errorf("day %q must be a number", in.day)
 		}
-		if i, err := strconv.Atoi(input.part); err != nil || i > 2 || i < 1 {
-			return fmt.Errorf("part %q must be either 1 or 2", input.part)
+		if i, err := strconv.Atoi(in.part); err != nil || i > 2 || i < 1 {
+			return fmt.Errorf("part %q must be either 1 or 2", in.part)
 		}
-		fallthrough
 	case opInitDay:
-		if _, err := strconv.Atoi(input.year); err != nil {
-			return fmt.Errorf("year %q must be a number", input.year)
+		if _, err := strconv.Atoi(in.year); err != nil {
+			return fmt.Errorf("year %q must be a number", in.year)
 		}
-		if input.day == "" {
-			return errors.New("no day (-d) provided")
+		if _, err := strconv.Atoi(in.day); err != nil {
+			return fmt.Errorf("day %q must be a number", in.day)
 		}
-		if _, err := strconv.Atoi(input.day); err != nil {
-			return fmt.Errorf("day %q must be a number", input.day)
+	case opInitModule:
+		if in.module == "" {
+			return errors.New("no module name (-m) provided")
 		}
-	case opInit:
-		return errors.New("missing init argument")
+	default:
+		return fmt.Errorf("invalid command %q", in.op)
 	}
 
 	return nil
@@ -187,9 +195,9 @@ func defaultInput() input {
 	}
 
 	return input{
-		op:    opRun,
+		op:    opPuzzleRun,
 		year:  strconv.Itoa(year),
-		input: "input",
+		input: "input.txt",
 	}
 }
 

@@ -71,7 +71,7 @@ Best dur: %s
 	return nil
 }
 
-func Unock(year, day, part, input string) error {
+func Unlock(year, day, part, input string) error {
 	key := cache.Key(year, fmt.Sprint("day", day), fmt.Sprint("part", part), input)
 	if _, exists := cache.ContainsKey(key); !exists {
 		fmt.Printf("No record of running %s with %s\n", filepath.Join(year, day, part), fmt.Sprintf("%s.txt", input))
