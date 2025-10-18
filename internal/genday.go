@@ -7,7 +7,7 @@ import (
 	"github.com/gombrii/aoc/internal/files"
 )
 
-const part1 = `// Package {{.DayName}} solves puzzle available on https://adventofcode.com/{{.Year}}/day/{{.Day}}
+const part1Tmpl = `// Package {{.DayName}} solves puzzle available on https://adventofcode.com/{{.Year}}/day/{{.Day}}
 package {{.DayName}}
 
 func Part1(data []byte) any {
@@ -16,7 +16,7 @@ func Part1(data []byte) any {
 	return "NOT IMPLEMENTED!"
 }`
 
-const part2 = `// Package {{.DayName}} solves puzzle available on https://adventofcode.com/{{.Year}}/day/{{.Day}}
+const part2Tmpl = `// Package {{.DayName}} solves puzzle available on https://adventofcode.com/{{.Year}}/day/{{.Day}}
 package {{.DayName}}
 
 func Part2(data []byte) any {
@@ -25,7 +25,7 @@ func Part2(data []byte) any {
 	return "NOT IMPLEMENTED!"
 }`
 
-const common = `// Package {{.DayName}} solves puzzle available on https://adventofcode.com/{{.Year}}/day/{{.Day}}
+const commonTmpl = `// Package {{.DayName}} solves puzzle available on https://adventofcode.com/{{.Year}}/day/{{.Day}}
 package {{.DayName}}`
 
 func GenDay(year, day string) error {
@@ -33,9 +33,9 @@ func GenDay(year, day string) error {
 
 	if err := files.Gen(
 		map[string]string{
-			filepath.Join(year, "solutions", dayName, "part1.go"):  part1,
-			filepath.Join(year, "solutions", dayName, "part2.go"):  part2,
-			filepath.Join(year, "solutions", dayName, "common.go"): common,
+			filepath.Join(year, "solutions", dayName, "part1.go"):  part1Tmpl,
+			filepath.Join(year, "solutions", dayName, "part2.go"):  part2Tmpl,
+			filepath.Join(year, "solutions", dayName, "common.go"): commonTmpl,
 			filepath.Join(year, "input", dayName, "input.txt"):     "",
 			filepath.Join(year, "input", dayName, "test.txt"):      "",
 		},

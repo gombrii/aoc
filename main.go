@@ -25,7 +25,7 @@ const (
 const usage = `Usage:
   aoc [puzzle run] <params>
   aoc puzzle {run|status|lock|unlock} -d DAY -p {1|2} [-y YEAR default: {{year}}] [-i INPUT default: input.txt]
-  aoc init   {-d DAY [-y YEAR] | -m MODULE_NAME}
+  aoc init   {-d DAY [-y YEAR] | -m MODULENAME}
   aoc cache clear
   aoc help [command]
 
@@ -59,7 +59,7 @@ type input struct {
 }
 
 func main() {
-	if len(os.Args) == 1 || len(os.Args) == 2 && (os.Args[1] == "h" || os.Args[1] == "help" || os.Args[1] == "-h" || os.Args[1] == "--help") {
+	if len(os.Args) == 1 || len(os.Args) == 2 && os.Args[1] == "help"{
 		fmt.Println(strings.ReplaceAll(usage, "{{year}}", defaultInput().year))
 		return
 	}
@@ -104,21 +104,14 @@ func parseInput(args []string) (input, error) {
 
 	i := 0
 	for j, arg := range args {
-		fmt.Println("i:", i, "arg:", arg)
 		i = j
 		if strings.HasPrefix(arg, "-") {
 			break
 		}
 		op = append(op, arg)
 	}
-	fmt.Println("i:", i)
 
 	for param, val := range paramVals(args[i:]) {
-		fmt.Println("i:", i, "p:", param, "v:", val)
-		//if val == "" || strings.HasPrefix(val, "-") {
-		//	return input{}, fmt.Errorf("invalid argument %q to param %s", val, param)
-		//}
-
 		switch param {
 		case "-y", "--year":
 			in.year = val
@@ -130,11 +123,6 @@ func parseInput(args []string) (input, error) {
 			in.input = val
 		case "-m", "--module":
 			in.module = val
-		default:
-			//if strings.HasPrefix(param, "-") {
-			//	return input{}, fmt.Errorf("unknown parameter %q", param)
-			//}
-			//return input{}, fmt.Errorf("loose argument %q", param)
 		}
 	}
 
@@ -178,6 +166,7 @@ func validate(in input) error {
 		if in.module == "" {
 			return errors.New("no module name (-m) provided")
 		}
+	case opCacheClear:
 	default:
 		return fmt.Errorf("invalid command %q", in.op)
 	}

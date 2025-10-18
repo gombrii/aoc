@@ -32,7 +32,7 @@ mkdir myaocproject
 cd myaocproject
 
 # Initiate go.mod and shared library
-aoc init myaocproject
+aoc init -m myaocproject
 
 # Initiate a day
 aoc init -d 1
@@ -61,38 +61,25 @@ myaocproject/
 ```
 ## Usage
 ```
-aoc [run] --day DAY --part {1|2} [--year YEAR default: curr AoC year] [--input INPUT default: input]
-aoc init --day DAY [--year YEAR default: curr AoC year]
-aoc init <module>
-aoc status --day DAY --part {1|2} [--year YEAR default: curr AoC year] [--input INPUT default: input]
-aoc lock   --day DAY --part {1|2} [--year YEAR default: curr AoC year] [--input INPUT default: input]
-aoc unlock --day DAY --part {1|2} [--year YEAR default: curr AoC year] [--input INPUT default: input]
+aoc [puzzle run] <params>
+aoc puzzle {run|status|lock|unlock} -d DAY -p {1|2} [-y YEAR default: {{year}}] [-i INPUT default: input.txt]
+aoc init   {-d DAY [-y YEAR] | -m MODULENAME}
 aoc cache clear
-aoc help
+aoc help [command]
 
-Commands:
-  run (default)         Run solution for a given day and part
-  init                  Initialize an AoC module or a new day
-  status                Show cached status for a specific puzzle
-  lock                  Lock the result for a specific puzzle
-  unlock                Unlock the result for a specific puzzle
-  cache clear           Clear puzzle solutions cache
-  help                  Print this
-```
+Puzzle commands:
+  run          Execute a puzzle (default when no subcommand is given)
+  status       Show result and duration of last run of puzzle
+  lock         Lock result; future runs error if they deviate; keep fastest duration
+  unlock       Unlock result; remember only last run
 
-```shell
-# Examples
-aoc -d 1 -p 1
-# Run part 1 of day 1 for the current year's AoC with puzzle input from input.txt
+Project setup:
+  init --day       Scaffold solution files for a day
+  init --module    Create a new AoC module structure
 
-aoc -y 2023 -d 5 -p 2 -i test
-# Run part 2 of day 5, year 2023, using input file test.txt
-
-aoc init mymodule
-# Initialize a new Advent of Code module (creates go.mod and shared utilities)
-
-aoc init --day 3
-# Create scaffolding for day 3 (solutions + input directories)
+Misc:
+  cache clear      Clear cached runners and metadata
+  help             Show this or command-specific help
 ```
 
 ## How it works
@@ -100,9 +87,9 @@ aoc init --day 3
 - Each day’s puzzle input lives under `YEAR/input/dayX/`.
 - Each part (Part1, Part2) is implemented as a Go function taking a []byte (puzzle input).
 - The aoc init command:
-    - If provided a mod name creates a mod file with your system's currently installed Go version as well as a couple of utility packages under `shared/` (can be removed if not needed).
+    - If provided a mod name, eg. `-m mymodule`, creates a mod file with your system's currently installed Go version as well as a couple of utility packages under `shared/` (can be removed if not needed).
     - If provided a day, eg. `-d 1`, creates the scaffolding for a new day's solutions and input.
-- The aoc run command (default):
+- The aoc puzzle run command (default):
     1. Builds a temporary runner or fetches from cache.
     1. Invokes the corresponding function.
     1. Prints the result and execution duration.
@@ -113,7 +100,7 @@ How generated day1 part1 looks like:
 package day1
 
 func Part1(data []byte) any {
-	// in := input.Lines(data)
+	// in := parse.Lines(data)
 
 	return "NOT IMPLEMENTED!"
 }
@@ -129,18 +116,18 @@ Res: 2970687
 Dur: 304µs
 ```
 
-"Res" is whatever was returned from the PartX function and "Dur" is the time measured from the moment the PartX function was called to the moment after it returned. The loading of the puzzle input file data happens before time starts recording. Printing (for debug purposes or otherwise) will not interfere with anything, so feel free to do so. Prints will simply appear between "Running year/dayX/partX with X.txt" and the "Res" and "Dur" statements.
+`Res` is whatever was returned from the PartX function and `Dur` is the time measured from the moment the PartX function was called to the moment after it returned. The loading of the puzzle input file data happens before time starts recording. Printing (for debug purposes or otherwise) will not interfere with anything, so feel free to do so. Prints will simply appear between "Running year/dayX/partX with X.txt" and the `Res` and `Dur` statements.
 
-Every initiated day's input catalogue gets two empty text files (`input.txt`, `test.txt`) into which you copy paste that day's puzzle input. Run with `-i` to run the puzzle with a specific input file, eg. `aoc -d 1 -p 2 -i test` to run with `test.txt`. The default is `input`, which runs the puzzle with `input.txt`. If the challenge presents more than one test input, simply create more test input files.
+Every initiated day's input catalogue gets two empty text files (`input.txt`, `test.txt`) into which you copy paste that day's puzzle input. Run with `-i` to run the puzzle with a specific input file, eg. `aoc -d 1 -p 2 -i test.txt`. The default is `input.txt`. If the challenge presents more than one test input, simply create more test input files.
 
 ### Locking
-Aoc remembers the results and durations of each solution's last run. Locking a solution does two things. It locks down the result for that solution so that it's not overwritten and it sees so that the duration for the solution only updates if it's shorter than the shortest recorded duration while the solution was locked. While the solution is locked aoc will also return an error if a change to the solution would return a different result than when it was locked.
+Aoc remembers the results and durations of each solution's last run. Locking a solution does two things. Firstly, it locks down the result for that solution so that it's not overwritten and instead errors if the solution's result deviates from the locked down result. Secondly, it sees to that the duration for the solution only updates if it's shorter than the shortest recorded duration.
 
 The typical usecase for locking a solution is after a correct result has been achieved. Often the first solution is sloppy or naïve. When the solution is locked it gives you the oppertunity to experiment and polish your solution and compare results, while getting clear feedback when something has gone wrong. Effectively you've turned your puzzle solution into a simple unit test and performance test testing itself. 
 
 ### Utilities
 At least in my mind, Advent of Code solutions are quick and dirty, thus don't need proper code hygiene. To achieve that, two helper packages are included when initiating the module:
-- shared/input — for parsing input data into common formats (Lines, String, Matrix, etc.)
+- shared/parse — for parsing input data into common formats (Lines, String, Matrix, etc.)
 - shared/exit — for exiting quickly in case of error (exit.If(err), exit.PanicIf(err))
 
 ## Author's notes
@@ -151,4 +138,3 @@ At least in my mind, Advent of Code solutions are quick and dirty, thus don't ne
 ### Technical debt
 - Unit tests to be able to guarantee stability.
 - Better app input (cli args). Right now it works, but it's kind of a mess and needs better input validation.
-- Think a little about feature creep and if the app still fits within the original scope.
