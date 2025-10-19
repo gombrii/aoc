@@ -27,6 +27,7 @@ const usage = `Usage:
   aoc [puzzle run] <params>
   aoc puzzle {run|status|lock|unlock} -d DAY -p {1|2} [-y YEAR default: {{year}}] [-i INPUT default: input.txt]
   aoc init   {-d DAY [-y YEAR] | -m MODULENAME}
+  aoc check 
   aoc cache clear
   aoc help [command]
 
@@ -41,13 +42,14 @@ Project setup:
   init --module    Create a new AoC module structure
 
 Misc:
+  check            Run all locked puzzles to verify results
   cache clear      Clear cached runners and metadata
   help             Show this or command-specific help
 
 Concepts:
   • Puzzle = (year, day, part, input).
   • Locked puzzles act like tests: runs must match locked results.
-  • Input files must include their extension (e.g. test.txt).
+  • Checking makes it easy to verify function of modified shared code.
 `
 
 type input struct {

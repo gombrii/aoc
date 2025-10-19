@@ -64,6 +64,7 @@ myaocproject/
 aoc [puzzle run] <params>
 aoc puzzle {run|status|lock|unlock} -d DAY -p {1|2} [-y YEAR default: {{year}}] [-i INPUT default: input.txt]
 aoc init   {-d DAY [-y YEAR] | -m MODULENAME}
+aoc check 
 aoc cache clear
 aoc help [command]
 
@@ -78,6 +79,7 @@ Project setup:
   init --module    Create a new AoC module structure
 
 Misc:
+  check            Run all locked puzzles to verify results
   cache clear      Clear cached runners and metadata
   help             Show this or command-specific help
 ```
@@ -125,6 +127,24 @@ Aoc remembers the results and durations of each solution's last run. Locking a s
 
 The typical usecase for locking a solution is after a correct result has been achieved. Often the first solution is sloppy or naïve. When the solution is locked it gives you the oppertunity to experiment and polish your solution and compare results, while getting clear feedback when something has gone wrong. Effectively you've turned your puzzle solution into a simple unit test and performance test testing itself. 
 
+### Checking
+The `check` command will run all locked puzzles at once and check their results. Only puzzles which produce correct results get a golden star (*).
+
+Eg.
+```shell
+$ aoc check
+2024/day1/part1  x      # produced wrong output
+2024/day2/part1  *
+2024/day3/part1  error  # paniced or exited early
+2024/day4/part1  *
+2024/day5/part1  *
+2024/day6/part1  *
+2024/day7/part1  *
+2024/day8/part1  *
+2024/day9/part1  *
+2024/day10/part1 *
+```
+
 ### Utilities
 At least in my mind, Advent of Code solutions are quick and dirty, thus don't need proper code hygiene. To achieve that, two helper packages are included when initiating the module:
 - shared/parse — for parsing input data into common formats (Lines, String, Matrix, etc.)
@@ -132,7 +152,6 @@ At least in my mind, Advent of Code solutions are quick and dirty, thus don't ne
 
 ## Author's notes
 ### Feature additions
-- I will probably add feature to check that all locked solutions still give the same result. That way it enables the user to adjust shared code and still check that all solutions work correctly.
 - I might add a couple of more utilities for parsing input and maybe an iterator.
 - I'll probably add one or two printing utilities for matrices. Writing one's own matrix printing loop isn't the most fun thing in the world just to make a debug print.
 ### Technical debt
