@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"errors"
 	"fmt"
 	"os/exec"
 	"path/filepath"
@@ -69,7 +68,9 @@ func Check() error {
 				print(i, puzzles, spinner)
 				return nil
 			}
-			if out.success {
+			if out.err != nil {
+				puzzles[out.i].result = "\033[38;2;255;0;0merror\033[0m"
+			} else if out.success {
 				puzzles[out.i].result = "\033[38;2;255;255;103m*\033[0m"
 			} else {
 				puzzles[out.i].result = "\033[38;2;255;0;0mx\033[0m"
@@ -84,11 +85,9 @@ func Check() error {
 func runnerRoutine(path string, i int, ch chan<- outcome, wg *sync.WaitGroup) {
 	defer wg.Done()
 	out, err := exec.Command("go", "run", path).Output()
-	var exitErr *exec.ExitError
-	if err != nil && !errors.As(err, &exitErr) {
-		ch <- outcome{0, false, err}
-	}
-	if strings.Contains(string(out), "Error") {
+	if err != nil {
+		ch <- outcome{i, false, err}
+	} else if strings.Contains(string(out), "Error") {
 		ch <- outcome{i, false, nil}
 	} else {
 		ch <- outcome{i, true, nil}
