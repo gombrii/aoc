@@ -133,13 +133,24 @@ func parseInput(args []string) (input, error) {
 		case "-p", "--part":
 			numVal, err := strconv.Atoi(val)
 			if err != nil {
-				return input{}, fmt.Errorf("year (-p) %q must be a number {1|2}", val)
+				return input{}, fmt.Errorf("part (-p) %q must be a number {1|2}", val)
 			}
 			in.part = numVal
 		case "-i", "--input":
+			if val == "" {
+				return input{}, errors.New("input (-i) requires a value")
+			}
 			in.input = val
 		case "-m", "--module":
+			if val == "" {
+				return input{}, errors.New("module (-m) requires a value")
+			}
 			in.module = val
+		default:
+			if strings.HasPrefix(param, "-") {
+				return input{}, fmt.Errorf("unknown flag %q", param)
+			}
+			return input{}, fmt.Errorf("stray argument %q", param)
 		}
 	}
 
@@ -164,26 +175,27 @@ func validate(in input) error {
 	switch in.op {
 	case opPuzzleRun, opPuzzleStatus, opPuzzleLock, opPuzzleUnlock:
 		if in.year == 0 {
-			return errors.New("year (-y) 0 or not set")
+			return errors.New("year (-y) is required")
 		}
 		if in.day == 0 {
-			return errors.New("day (-d) 0 or not set")
+			return errors.New("day (-d) is required")
 		}
 		if in.part > 2 || in.part < 1 {
 			return errors.New("part (-p) not set to valid value {1|2}")
 		}
 	case opInitDay:
 		if in.year == 0 {
-			return errors.New("year (-y) 0 or not set")
+			return errors.New("year (-y) is required")
 		}
 		if in.day == 0 {
-			return errors.New("day (-d) 0 or not set")
+			return errors.New("day (-d) is required")
 		}
 	case opInitModule:
 		if in.module == "" {
-			return errors.New("no module name (-m) provided")
+			return errors.New("module name (-m) is required")
 		}
 	case opCacheClear, opCheck:
+		// No args
 	default:
 		return fmt.Errorf("invalid command %q", in.op)
 	}
@@ -196,7 +208,8 @@ func defaultInput() input {
 	year := now.Year()
 
 	// Before the start of this year's AoC default to previous year.
-	if now.Before(time.Date(now.Year(), time.December, 1, 0, 0, 0, 0, time.FixedZone("UTC-5", int(-5*time.Hour)))) {
+	ny, _ := time.LoadLocation("America/New_York")
+	if now.Before(time.Date(now.Year(), time.December, 1, 0, 0, 0, 0, ny)) {
 		year -= 1
 	}
 

@@ -90,7 +90,7 @@ Misc:
 - Each part (Part1, Part2) is implemented as a Go function taking a []byte (puzzle input).
 - The aoc init command:
     - If provided a mod name, eg. `-m mymodule`, creates a mod file with your system's currently installed Go version as well as a couple of utility packages under `shared/` (can be removed if not needed).
-    - If provided a day, eg. `-d 1`, creates the scaffolding for a new day's solutions and input for the given year. If no year, eg. `-y 2023`, is provided the default is the year during which the last Advent of Code started. This means that the default year the majority of time is the previous year. On Dec 1 00:00 UTF-5 when the current years AoC is released the default year flips over to the current year.
+    - If provided a day, eg. `-d 1`, creates the scaffolding for a new day's solutions and input for the given year. If no year, eg. `-y 2023`, is provided the default is the year during which the last Advent of Code started. This means that the default year the majority of time is the previous year. On Dec 1 00:00 UTC-5 when the current years AoC is released the default year flips over to the current year.
 - The aoc puzzle run command (default):
     1. Builds a temporary runner or fetches from cache.
     1. Invokes the corresponding function.
