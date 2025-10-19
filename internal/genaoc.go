@@ -3,9 +3,9 @@ package internal
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 
+	"github.com/gombrii/aoc/internal/exec"
 	"github.com/gombrii/aoc/internal/files"
 )
 
@@ -65,7 +65,7 @@ func Matrix(data []byte, delimiter string) [][]string {
 
 func GenAoc(module string) error {
 	if _, err := os.Stat("go.mod"); err != nil {
-		err := exec.Command("go", "mod", "init", module).Run()
+		_, err := exec.CommandAndCapture("go", "mod", "init", module)
 		if err != nil {
 			return fmt.Errorf("initiating go.mod: %v", err)
 		}

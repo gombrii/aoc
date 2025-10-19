@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gombrii/aoc/internal/cache"
+	"github.com/gombrii/aoc/internal/exec"
 	"github.com/gombrii/aoc/internal/files"
 )
 
@@ -84,7 +84,7 @@ func Check() error {
 
 func runnerRoutine(path string, i int, ch chan<- outcome, wg *sync.WaitGroup) {
 	defer wg.Done()
-	out, err := exec.Command("go", "run", path).Output()
+	out, err := exec.BinaryAndCapture(path)
 	if err != nil {
 		ch <- outcome{i, false, err}
 	} else if strings.Contains(string(out), "Error") {

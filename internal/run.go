@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"math"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gombrii/aoc/internal/cache"
+	"github.com/gombrii/aoc/internal/exec"
 	"github.com/gombrii/aoc/internal/files"
 	"golang.org/x/mod/modfile"
 )
@@ -97,7 +97,7 @@ func Run(year, day, part int, input string) error {
 		return fmt.Errorf("setting up runner: %v", err)
 	}
 
-	if err = executeRunner(path); err != nil {
+	if err = exec.BinaryAndPrint(path); err != nil {
 		return fmt.Errorf("executing runner: %v", err)
 	}
 
@@ -152,22 +152,8 @@ func getRunnerPath(year, day, part int, input string) (string, error) {
 	return rPath, nil
 }
 
-func executeRunner(path string) error {
-	cmd := exec.Command("go", "run", path)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-
-	var exitErr *exec.ExitError
-	if err := cmd.Run(); err != nil && !errors.As(err, &exitErr) {
-		return err
-	}
-
-	return nil
-}
-
 func currentModulePath() (string, error) {
-	out, err := exec.Command("go", "env", "GOMOD").Output()
+	out, err := exec.CommandAndCapture("go", "env", "GOMOD")
 	if err != nil {
 		return "", err
 	}
