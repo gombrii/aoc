@@ -8,7 +8,11 @@ import (
 
 func location() (string, error) {
 	osCache, _ := os.UserCacheDir()
-	return filepath.Join(osCache, "aoc-cache"), nil
+	name := os.Getenv("AOC_CACHE_NAME")
+	if name == "" {
+		name = "aoc-cache"
+	}
+	return filepath.Join(osCache, name), nil
 }
 
 func Key(year, day, part, input string) string {

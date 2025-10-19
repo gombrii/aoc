@@ -10,7 +10,7 @@ import (
 func Gen(structure map[string]string, data map[string]string) error {
 	for fPath, tmpl := range structure {
 		if _, err := os.Stat(fPath); err == nil {
-			fmt.Printf("%s already exists", fPath)
+			fmt.Printf("skipping %s, already exists\n", fPath)
 			continue
 		}
 

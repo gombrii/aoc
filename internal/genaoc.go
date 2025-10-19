@@ -9,7 +9,7 @@ import (
 	"github.com/gombrii/aoc/internal/files"
 )
 
-const exit = `// Package exit does, in the spirit of Advent of Code, provide quick and dirty ways to fail.
+const exitTmpl = `// Package exit does, in the spirit of Advent of Code, provide quick and dirty ways to fail.
 package exit
 
 import (
@@ -32,7 +32,7 @@ func PanicIf(err error) {
 	}
 }`
 
-const input = `// Package input does, in the spirit of Advent of Code, provide some common ways to interpret the 
+const parseTmpl = `// Package input does, in the spirit of Advent of Code, provide some common ways to interpret the 
 // puzzles' input data.
 package parse
 
@@ -72,8 +72,8 @@ func GenAoc(module string) error {
 	}
 
 	if err := files.Gen(map[string]string{
-		filepath.Join("shared", "parse", "input.go"): input,
-		filepath.Join("shared", "exit", "error.go"):  exit,
+		filepath.Join("shared", "parse", "input.go"): parseTmpl,
+		filepath.Join("shared", "exit", "error.go"):  exitTmpl,
 	}, nil); err != nil {
 		return fmt.Errorf("generating files: %v", err)
 	}

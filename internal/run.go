@@ -84,7 +84,7 @@ func Run(year, day, part, input string) error {
 		return fmt.Errorf("%v does not exist", filepath.Join(year, day, part))
 	}
 
-	fmt.Printf("Running %s with %s\n", filepath.Join(year, day, part), fmt.Sprintf("%s.txt", input))
+	fmt.Printf("Running %s with %s\n", filepath.Join(year, day, part), input)
 
 	path, err := getRunnerPath(year, day, part, input)
 	if err != nil {
@@ -119,7 +119,7 @@ func getRunnerPath(year, day, part, input string) (string, error) {
 		"PkgPath":   filepath.Join(mod, year, "solutions", day),
 		"PkgName":   day,
 		"FuncName":  strings.Replace(part, "p", "P", 1),
-		"InputPath": filepath.Join(year, "input", day, fmt.Sprintf("%s.txt", input)),
+		"InputPath": filepath.Join(year, "input", day, input),
 		"LockPath":  cache.MakePath(cacheKey, files.Lock),
 		"ResPath":   cache.MakePath(cacheKey, files.Res),
 		"DurPath":   cache.MakePath(cacheKey, files.Dur),
