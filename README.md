@@ -14,7 +14,7 @@ It handles project setup, day initialization, and execution of specific parts wi
 ## Features
 
 - **Run** any day and part directly from the CLI
-- **Initialize** a new AoC module with shared helpers (`input`, `exit`, etc.)
+- **Initialize** a new AoC module with shared helpers (`parse`, `exit`, etc.)
 - **Scaffold** new solution files for specific days automatically
 - **Auto-detects the current Advent of Code year**, defaulting to the year of the most recently started Advent of Code
 - **Generate** minimal boilerplate code to get started quickly
@@ -47,7 +47,7 @@ myaocproject/
 ├── go.mod
 ├── shared/
 │   ├── exit/error.go
-│   └── input/input.go
+│   └── parse/input.go
 ├── 2025/
 │   ├── input/
 │   │   └── day1/
@@ -62,8 +62,8 @@ myaocproject/
 ## Usage
 ```
 aoc [puzzle run] <params>
-aoc puzzle {run|status|lock|unlock} -d DAY -p {1|2} [-y YEAR default: {{year}}] [-i INPUT default: input.txt]
-aoc init   {-d DAY [-y YEAR] | -m MODULENAME}
+aoc puzzle {run|status|lock|unlock} -d DAY -p {1|2} [-y YEAR default: Curr AoC year] [-i INPUT default: input.txt]
+aoc init   {-d DAY [-y YEAR default: Curr AoC year]] | -m MODULENAME}
 aoc check 
 aoc cache clear
 aoc help [command]
@@ -90,7 +90,7 @@ Misc:
 - Each part (Part1, Part2) is implemented as a Go function taking a []byte (puzzle input).
 - The aoc init command:
     - If provided a mod name, eg. `-m mymodule`, creates a mod file with your system's currently installed Go version as well as a couple of utility packages under `shared/` (can be removed if not needed).
-    - If provided a day, eg. `-d 1`, creates the scaffolding for a new day's solutions and input.
+    - If provided a day, eg. `-d 1`, creates the scaffolding for a new day's solutions and input for the given year. If no year, eg. `-y 2023`, is provided the default is the year during which the last Advent of Code started. This means that the default year the majority of time is the previous year. On Dec 1 00:00 UTF-5 when the current years AoC is released the default year flips over to the current year.
 - The aoc puzzle run command (default):
     1. Builds a temporary runner or fetches from cache.
     1. Invokes the corresponding function.
