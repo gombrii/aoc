@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -10,10 +9,10 @@ import (
 	"github.com/gombrii/aoc/internal/files"
 )
 
-func Status(year, day, part, input string) error {
-	key := cache.Key(year, fmt.Sprint("day", day), fmt.Sprint("part", part), input)
+func Status(year, day, part int, input string) error {
+	key := cache.Key(year, day, part, input)
 	if _, exists := cache.ContainsKey(key); !exists {
-		fmt.Printf("No record of running %s with %s\n", filepath.Join(year, day, part), input)
+		fmt.Printf("No record of running %d/day%d/part%d with %s\n", year, day, part, input)
 		return nil
 	}
 
@@ -43,10 +42,10 @@ Last dur: %s
 	return nil
 }
 
-func Lock(year, day, part, input string) error {
-	key := cache.Key(year, fmt.Sprint("day", day), fmt.Sprint("part", part), input)
+func Lock(year, day, part int, input string) error {
+	key := cache.Key(year, day, part, input)
 	if _, exists := cache.ContainsKey(key); !exists {
-		fmt.Printf("No record of running %s with %s\n", filepath.Join(year, day, part), input)
+		fmt.Printf("No record of running %d/day%d/part%d with %s\n", year, day, part, input)
 		return nil
 	}
 
@@ -71,10 +70,10 @@ Best dur: %s
 	return nil
 }
 
-func Unlock(year, day, part, input string) error {
-	key := cache.Key(year, fmt.Sprint("day", day), fmt.Sprint("part", part), input)
+func Unlock(year, day, part int, input string) error {
+	key := cache.Key(year, day, part, input)
 	if _, exists := cache.ContainsKey(key); !exists {
-		fmt.Printf("No record of running %s with %s\n", filepath.Join(year, day, part), input)
+		fmt.Printf("No record of running %d/day%d/part%d with %s\n", year, day, part, input)
 		return nil
 	}
 

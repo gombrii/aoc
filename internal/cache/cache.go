@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
+
+type key string
 
 func location() (string, error) {
 	osCache, _ := os.UserCacheDir()
@@ -15,19 +18,18 @@ func location() (string, error) {
 	return filepath.Join(osCache, name), nil
 }
 
-func Key(year, day, part, input string) string {
-	//TODO: Maybe take year, day and part as ints and construct everything here.
-	return fmt.Sprintf("%s-%s-%s-%s", year, day, part, input)
+func Key(year, day, part int, input string) key {
+	return key(fmt.Sprintf("%d-day%d-part%d-%s", year, day, part, strings.Replace(input, ".txt", "", 1)))
 }
 
-func MakePath(key string, file string) string {
+func MakePath(key key, file string) string {
 	cache, _ := location()
-	return filepath.Join(cache, key, file)
+	return filepath.Join(cache, string(key), file)
 }
 
-func ContainsKey(key string) (string, bool) {
+func ContainsKey(key key) (string, bool) {
 	cache, _ := location()
-	path := filepath.Join(cache, key)
+	path := filepath.Join(cache, string(key))
 
 	if _, err := os.Stat(path); err != nil {
 		return "", false
@@ -36,9 +38,9 @@ func ContainsKey(key string) (string, bool) {
 	return path, true
 }
 
-func Contains(key string, file string) (string, bool) {
+func Contains(key key, file string) (string, bool) {
 	cache, _ := location()
-	path := filepath.Join(cache, key, file)
+	path := filepath.Join(cache, string(key), file)
 
 	if _, err := os.Stat(path); err != nil {
 		return "", false
@@ -47,9 +49,9 @@ func Contains(key string, file string) (string, bool) {
 	return path, true
 }
 
-func Store(key string, fileName string, src string) (string, error) {
+func Store(key key, fileName string, src string) (string, error) {
 	cPath, _ := location()
-	dPath := filepath.Join(cPath, key)
+	dPath := filepath.Join(cPath, string(key))
 	dst := filepath.Join(dPath, fileName)
 
 	if _, err := os.Stat(src); err != nil {

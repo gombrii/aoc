@@ -28,26 +28,27 @@ func Part2(data []byte) any {
 const commonTmpl = `// Package {{.DayName}} solves puzzle available on https://adventofcode.com/{{.Year}}/day/{{.Day}}
 package {{.DayName}}`
 
-func GenDay(year, day string) error {
-	dayName := fmt.Sprintf("day%s", day)
+func GenDay(year, day int) error {
+	yName := fmt.Sprintf("%d", year)
+	dName := fmt.Sprintf("day%d", day)
 
 	if err := files.Gen(
 		map[string]string{
-			filepath.Join(year, "solutions", dayName, "part1.go"):  part1Tmpl,
-			filepath.Join(year, "solutions", dayName, "part2.go"):  part2Tmpl,
-			filepath.Join(year, "solutions", dayName, "common.go"): commonTmpl,
-			filepath.Join(year, "input", dayName, "input.txt"):     "",
-			filepath.Join(year, "input", dayName, "test.txt"):      "",
+			filepath.Join(yName, "solutions", dName, "part1.go"):  part1Tmpl,
+			filepath.Join(yName, "solutions", dName, "part2.go"):  part2Tmpl,
+			filepath.Join(yName, "solutions", dName, "common.go"): commonTmpl,
+			filepath.Join(yName, "input", dName, "input.txt"):     "",
+			filepath.Join(yName, "input", dName, "test.txt"):      "",
 		},
 		map[string]string{
-			"Year":    year,
-			"Day":     day,
-			"DayName": dayName,
+			"Year":    yName,
+			"Day":     fmt.Sprint(day),
+			"DayName": dName,
 		}); err != nil {
 		return fmt.Errorf("generating files: %v", err)
 	}
 
-	fmt.Printf("Initiated %s %s\n", dayName, year)
+	fmt.Printf("Initiated %s %s\n", dName, yName)
 
 	return nil
 }

@@ -51,16 +51,16 @@ Concepts:
 
 type input struct {
 	op     string
-	year   string
-	day    string
-	part   string
+	year   int
+	day    int
+	part   int
 	input  string
 	module string
 }
 
 func main() {
-	if len(os.Args) == 1 || len(os.Args) == 2 && os.Args[1] == "help"{
-		fmt.Println(strings.ReplaceAll(usage, "{{year}}", defaultInput().year))
+	if len(os.Args) == 1 || len(os.Args) == 2 && os.Args[1] == "help" {
+		fmt.Println(strings.ReplaceAll(usage, "{{year}}", fmt.Sprint(defaultInput().year)))
 		return
 	}
 
@@ -114,11 +114,23 @@ func parseInput(args []string) (input, error) {
 	for param, val := range paramVals(args[i:]) {
 		switch param {
 		case "-y", "--year":
-			in.year = val
+			numVal, err := strconv.Atoi(val)
+			if err != nil {
+				return input{}, fmt.Errorf("year (-y) %q must be a number", val)
+			}
+			in.year = numVal
 		case "-d", "--day":
-			in.day = val
+			numVal, err := strconv.Atoi(val)
+			if err != nil {
+				return input{}, fmt.Errorf("day (-d) %q must be a number", val)
+			}
+			in.day = numVal
 		case "-p", "--part":
-			in.part = val
+			numVal, err := strconv.Atoi(val)
+			if err != nil {
+				return input{}, fmt.Errorf("year (-p) %q must be a number {1|2}", val)
+			}
+			in.part = numVal
 		case "-i", "--input":
 			in.input = val
 		case "-m", "--module":
@@ -129,7 +141,7 @@ func parseInput(args []string) (input, error) {
 	if len(op) > 0 && op[0] == "init" {
 		if in.module != "" {
 			op = append(op, "-m")
-		} else if in.day != "" {
+		} else if in.day != 0 {
 			op = append(op, "-d")
 		} else {
 			return input{}, errors.New("ambiguous call to init, no -d or -m arguments passed")
@@ -146,21 +158,21 @@ func parseInput(args []string) (input, error) {
 func validate(in input) error {
 	switch in.op {
 	case opPuzzleRun, opPuzzleStatus, opPuzzleLock, opPuzzleUnlock:
-		if _, err := strconv.Atoi(in.year); err != nil {
-			return fmt.Errorf("year %q must be a number", in.year)
+		if in.year == 0 {
+			return errors.New("year (-y) 0 or not set")
 		}
-		if _, err := strconv.Atoi(in.day); err != nil {
-			return fmt.Errorf("day %q must be a number", in.day)
+		if in.day == 0 {
+			return errors.New("day (-d) 0 or not set")
 		}
-		if i, err := strconv.Atoi(in.part); err != nil || i > 2 || i < 1 {
-			return fmt.Errorf("part %q must be either 1 or 2", in.part)
+		if in.part > 2 || in.part < 1 {
+			return errors.New("part (-p) not set to valid value {1|2}")
 		}
 	case opInitDay:
-		if _, err := strconv.Atoi(in.year); err != nil {
-			return fmt.Errorf("year %q must be a number", in.year)
+		if in.year == 0 {
+			return errors.New("year (-y) 0 or not set")
 		}
-		if _, err := strconv.Atoi(in.day); err != nil {
-			return fmt.Errorf("day %q must be a number", in.day)
+		if in.day == 0 {
+			return errors.New("day (-d) 0 or not set")
 		}
 	case opInitModule:
 		if in.module == "" {
@@ -185,7 +197,7 @@ func defaultInput() input {
 
 	return input{
 		op:    opPuzzleRun,
-		year:  strconv.Itoa(year),
+		year:  year,
 		input: "input.txt",
 	}
 }

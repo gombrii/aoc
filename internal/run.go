@@ -76,15 +76,16 @@ func write(path string, data string) {
 	}
 }`
 
-func Run(year, day, part, input string) error {
-	day = fmt.Sprintf("day%s", day)
-	part = fmt.Sprintf("part%s", part)
+func Run(year, day, part int, input string) error {
+	yName := fmt.Sprintf("%d", year)
+	dName := fmt.Sprintf("day%d", day)
+	pName := fmt.Sprintf("part%d", part)
 
-	if _, err := os.Stat(filepath.Join(year, "solutions", day, fmt.Sprintf("%s.go", part))); err != nil {
-		return fmt.Errorf("%v does not exist", filepath.Join(year, day, part))
+	if _, err := os.Stat(filepath.Join(yName, "solutions", dName, fmt.Sprintf("%s.go", pName))); err != nil {
+		return fmt.Errorf("%v does not exist", filepath.Join(yName, dName, pName))
 	}
 
-	fmt.Printf("Running %s with %s\n", filepath.Join(year, day, part), input)
+	fmt.Printf("Running %s with %s\n", filepath.Join(yName, dName, pName), input)
 
 	path, err := getRunnerPath(year, day, part, input)
 	if err != nil {
@@ -98,7 +99,7 @@ func Run(year, day, part, input string) error {
 	return nil
 }
 
-func getRunnerPath(year, day, part, input string) (string, error) {
+func getRunnerPath(year, day, part int, input string) (string, error) {
 	cacheKey := cache.Key(year, day, part, input)
 
 	if cPath, ok := cache.Contains(cacheKey, files.Runner); ok {
@@ -110,16 +111,20 @@ func getRunnerPath(year, day, part, input string) (string, error) {
 		return "", fmt.Errorf("getting module name: %v", err)
 	}
 
+	yName := fmt.Sprintf("%d", year)
+	dName := fmt.Sprintf("day%d", day)
+	pName := fmt.Sprintf("part%d", part)
+
 	fPaths, err := files.GenTemp(map[string]string{
 		files.Runner: runnerTmpl,
 		files.Lock:   strconv.FormatBool(false),
 		files.Res:    "",
 		files.Dur:    time.Duration(math.MaxInt64).String(),
 	}, map[string]string{
-		"PkgPath":   filepath.Join(mod, year, "solutions", day),
-		"PkgName":   day,
-		"FuncName":  strings.Replace(part, "p", "P", 1),
-		"InputPath": filepath.Join(year, "input", day, input),
+		"PkgPath":   filepath.Join(mod, yName, "solutions", dName),
+		"PkgName":   dName,
+		"FuncName":  strings.Replace(pName, "p", "P", 1),
+		"InputPath": filepath.Join(yName, "input", dName, input),
 		"LockPath":  cache.MakePath(cacheKey, files.Lock),
 		"ResPath":   cache.MakePath(cacheKey, files.Res),
 		"DurPath":   cache.MakePath(cacheKey, files.Dur),
