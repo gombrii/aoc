@@ -26,19 +26,19 @@ const (
 const usage = `Usage:
   aoc [puzzle run] <params>
   aoc puzzle {run|status|lock|unlock} -d DAY -p {1|2} [-y YEAR default: {{year}}] [-i INPUT default: input.txt]
-  aoc init   {-d DAY [-y YEAR] | -m MODULENAME}
+  aoc init   {-d DAY [-y YEAR default: {{year}}] | -m MODULENAME}
   aoc check 
   aoc cache clear
   aoc help [command]
 
 Puzzle commands:
-  run          Execute a puzzle (default when no subcommand is given)
-  status       Show result and duration of last run of puzzle
-  lock         Lock result; future runs error if they deviate; keep fastest duration
-  unlock       Unlock result; remember only last run
+  run          Execute a puzzle (default when no command is given)
+  status       Show last/locked result and last/best duration of of puzzle
+  lock         Lock result -> future runs error if they deviate, remembers fastest duration
+  unlock       Unlock result -> remember only last run
 
 Project setup:
-  init --day       Scaffold solution files for a day
+  init --day       Scaffold solution files for a new day
   init --module    Create a new AoC module structure
 
 Misc:
