@@ -25,3 +25,15 @@ func ReadAll(files map[string]string) (map[string]string, error) {
 
 	return data, nil
 }
+
+func Read(path string) ([]byte, error) {
+	return os.ReadFile(path)
+}
+
+func Exists(path string) bool {
+	if _, err := os.Stat(path); err != nil {
+		return false
+	}
+
+	return true
+}

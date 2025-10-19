@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -77,8 +76,7 @@ func write(path string, data string) {
 }`
 
 func Run(year, day, part int, input string) error {
-	_, err := os.Stat("go.mod")
-	if err != nil {
+	if !files.Exists("go.mod") {
 		return errors.New("not in Go module root (no go.mod found)")
 	}
 
@@ -86,7 +84,7 @@ func Run(year, day, part int, input string) error {
 	dName := fmt.Sprintf("day%d", day)
 	pName := fmt.Sprintf("part%d", part)
 
-	if _, err := os.Stat(filepath.Join(yName, "solutions", dName, fmt.Sprintf("%s.go", pName))); err != nil {
+	if files.Exists(filepath.Join(yName, "solutions", dName, fmt.Sprintf("%s.go", pName))) {
 		return fmt.Errorf("%v does not exist", filepath.Join(yName, dName, pName))
 	}
 
@@ -162,7 +160,7 @@ func currentModulePath() (string, error) {
 		return "", errors.New("not inside a Go module (no go.mod found)")
 	}
 
-	data, err := os.ReadFile(gomod)
+	data, err := files.Read(gomod)
 	if err != nil {
 		return "", err
 	}
