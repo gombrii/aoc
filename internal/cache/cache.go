@@ -2,8 +2,11 @@ package cache
 
 import (
 	"fmt"
+	"iter"
 	"os"
 	"path/filepath"
+	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -68,4 +71,21 @@ func Store(key key, fileName string, src string) (string, error) {
 func Clear() error {
 	cache, _ := location()
 	return os.RemoveAll(cache)
+}
+
+func All() iter.Seq2[int, string] {
+	cache, _ := location()
+	entries, _ := os.ReadDir(cache)
+	sort.Slice(entries, func(i, j int) bool {
+		di, _ := strconv.Atoi(strings.TrimPrefix(strings.Split(entries[i].Name(), "-")[1], "day"))
+		dj, _ := strconv.Atoi(strings.TrimPrefix(strings.Split(entries[j].Name(), "-")[1], "day"))
+		return di < dj
+	})
+	return func(yield func(int, string) bool) {
+		for i, e := range entries {
+			if !yield(i, filepath.Join(cache, e.Name())) {
+				return
+			}
+		}
+	}
 }

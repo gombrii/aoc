@@ -20,6 +20,7 @@ const (
 	opInitModule   = "init -m"
 	opInitDay      = "init -d"
 	opCacheClear   = "cache clear"
+	opCheck        = "check"
 )
 
 const usage = `Usage:
@@ -90,6 +91,8 @@ func main() {
 		err = internal.GenAoc(in.module)
 	case opCacheClear:
 		err = internal.ClearCache()
+	case opCheck:
+		err = internal.Check()
 	}
 
 	if err != nil {
@@ -178,7 +181,7 @@ func validate(in input) error {
 		if in.module == "" {
 			return errors.New("no module name (-m) provided")
 		}
-	case opCacheClear:
+	case opCacheClear, opCheck:
 	default:
 		return fmt.Errorf("invalid command %q", in.op)
 	}
