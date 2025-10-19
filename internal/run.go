@@ -77,6 +77,11 @@ func write(path string, data string) {
 }`
 
 func Run(year, day, part int, input string) error {
+	_, err := os.Stat("go.mod")
+	if err != nil {
+		return errors.New("not in Go module root (no go.mod found)")
+	}
+
 	yName := fmt.Sprintf("%d", year)
 	dName := fmt.Sprintf("day%d", day)
 	pName := fmt.Sprintf("part%d", part)
