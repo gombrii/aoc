@@ -84,7 +84,7 @@ func Run(year, day, part int, input string) error {
 	dName := fmt.Sprintf("day%d", day)
 	pName := fmt.Sprintf("part%d", part)
 
-	if files.Exists(filepath.Join(yName, "solutions", dName, fmt.Sprintf("%s.go", pName))) {
+	if !files.Exists(filepath.Join(yName, "solutions", dName, fmt.Sprintf("%s.go", pName))) {
 		return fmt.Errorf("%v does not exist", filepath.Join(yName, dName, pName))
 	}
 

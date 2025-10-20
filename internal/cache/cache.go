@@ -10,18 +10,7 @@ import (
 	"strings"
 )
 
-const defaultCache = "aoc-cache"
-
 type key string
-
-func location() string {
-	osCache, _ := os.UserCacheDir()
-	override := os.Getenv("AOC_CACHE")
-	if override != "" {
-		return filepath.Join(osCache, override)
-	}
-	return filepath.Join(osCache, defaultCache)
-}
 
 func Key(year, day, part int, input string) key {
 	return key(fmt.Sprintf("%d-day%d-part%d-%s", year, day, part, strings.Replace(input, ".txt", "", 1)))

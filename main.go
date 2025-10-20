@@ -1,8 +1,7 @@
-// Package main is the entry to the aoc app
-//
-// For strictly testing purposes aoc listenes to two environment variables
-// - AOC_HOME (overrides "your" catalogue)
-// - AOC_CACHE (overrides cache catalogue)
+// Package main is the entry to the aoc app.
+// 
+// For strictly testing purposes aoc listenes to one environment variable:
+// 	- AOC_CACHE (overrides cache catalogue)
 package main
 
 import (
