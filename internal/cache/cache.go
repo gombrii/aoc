@@ -10,15 +10,17 @@ import (
 	"strings"
 )
 
+const defaultCache = "aoc-cache"
+
 type key string
 
-func location() (string, error) {
+func location() string {
 	osCache, _ := os.UserCacheDir()
-	name := os.Getenv("AOC_CACHE_NAME")
-	if name == "" {
-		name = "aoc-cache"
+	override := os.Getenv("AOC_CACHE")
+	if override != "" {
+		return filepath.Join(osCache, override)
 	}
-	return filepath.Join(osCache, name), nil
+	return filepath.Join(osCache, defaultCache)
 }
 
 func Key(year, day, part int, input string) key {
@@ -26,12 +28,12 @@ func Key(year, day, part int, input string) key {
 }
 
 func MakePath(key key, file string) string {
-	cache, _ := location()
+	cache := location()
 	return filepath.Join(cache, string(key), file)
 }
 
 func ContainsKey(key key) (string, bool) {
-	cache, _ := location()
+	cache := location()
 	path := filepath.Join(cache, string(key))
 
 	if _, err := os.Stat(path); err != nil {
@@ -42,7 +44,7 @@ func ContainsKey(key key) (string, bool) {
 }
 
 func Contains(key key, file string) (string, bool) {
-	cache, _ := location()
+	cache := location()
 	path := filepath.Join(cache, string(key), file)
 
 	if _, err := os.Stat(path); err != nil {
@@ -53,7 +55,7 @@ func Contains(key key, file string) (string, bool) {
 }
 
 func Store(key key, fileName string, src string) (string, error) {
-	cPath, _ := location()
+	cPath := location()
 	dPath := filepath.Join(cPath, string(key))
 	dst := filepath.Join(dPath, fileName)
 
@@ -69,12 +71,12 @@ func Store(key key, fileName string, src string) (string, error) {
 }
 
 func Clear() error {
-	cache, _ := location()
+	cache := location()
 	return os.RemoveAll(cache)
 }
 
 func All() iter.Seq2[int, string] {
-	cache, _ := location()
+	cache := location()
 	entries, _ := os.ReadDir(cache)
 	sort.Slice(entries, func(i, j int) bool {
 		di, _ := strconv.Atoi(strings.TrimPrefix(strings.Split(entries[i].Name(), "-")[1], "day"))
