@@ -14,16 +14,16 @@ func assertDirEqual(t *testing.T, wantDir, gotDir string) {
 	assert.Assert(t, fs.Equal(gotDir, expected))
 }
 
-func prepare(t *testing.T) (tmpRoot, tmpCache, wd string) {
+func prepare(t *testing.T) (testRoot, testCache, wd string) {
 	t.Helper()
 	wd, err := os.Getwd()
 	if err != nil {
 		t.Fail()
 	}
-	tmpRoot = t.TempDir()
-	tmpCache = t.TempDir()
-	t.Chdir(tmpRoot)
-	t.Setenv("AOC_CACHE", tmpCache)
+	testRoot = t.TempDir()
+	testCache = t.TempDir()
+	t.Chdir(testRoot)
+	t.Setenv("AOC_CACHE", testCache)
 
-	return tmpRoot, tmpCache, wd
+	return testRoot, testCache, wd
 }

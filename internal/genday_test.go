@@ -7,10 +7,13 @@ import (
 	"github.com/gombrii/aoc/internal"
 )
 
+// TODO: Will fail depending on current date
 func TestGenDay(t *testing.T) {
-	tmpRoot, _, wd := prepare(t)
+	testRoot, _, wd := prepare(t)
 
-	internal.GenDay(2024, 1)
+	if err := internal.GenDay(2024, 1); err != nil {
+		t.Fail()
+	}
 
-	assertDirEqual(t, filepath.Join(wd, "testdata", "newday"), tmpRoot)
+	assertDirEqual(t, filepath.Join(wd, "testdata", "newday"), testRoot)
 }

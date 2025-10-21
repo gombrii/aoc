@@ -124,7 +124,7 @@ Every initiated day's input catalogue gets two empty text files (`input.txt`, `t
 ### Locking
 Aoc remembers the results and durations of each solution's last run. Locking a solution does two things. Firstly, it locks in the result for that solution so that it's not overwritten and instead errors if the solution's result deviates from the locked in result. Secondly, it sees to that the duration for the solution only updates if it's shorter than the shortest recorded duration.
 
-The typical usecase for locking a solution is after a correct result has been achieved. Often the first solution is sloppy or naïve. When the solution is locked it gives you the oppertunity to experiment and polish your solution and compare results, while getting clear feedback when something has gone wrong. Effectively you've turned your puzzle solution into a simple unit- and performance test testing itself. 
+The typical use case for locking a solution is after a correct result has been achieved. Often the first solution is sloppy or naïve. When the solution is locked it gives you the opportunity to experiment and polish your solution and compare results, while getting clear feedback when something has gone wrong. Effectively you've turned your puzzle solution into a simple unit- and performance test testing itself. 
 
 ### Checking
 The `check` command will run all locked puzzles at once and verify their results. Only puzzles which produce correct results get a golden star (*).
