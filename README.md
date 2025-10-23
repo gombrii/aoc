@@ -6,10 +6,9 @@
 # Advent of Code CLI (`aoc`)
 
 A command-line tool to streamline your **Advent of Code** workflow in **Go**, from scaffolding new solutions to running them with input data, chasing better solutions and execution times.  
-It handles project setup, day initialization, and execution of specific parts with minimal friction.
-> Last year I wrote something similar to this, albeit much simpler, in my AoC repo. Now I thought it'd be neat to keep the facilitation of AoC challenges as a standalone app, separate from the actual challenges, hence this.
->
-> The goal of this application is to impose upon the user as little as possible and let the user run and write his/her own solutions along with any helper code. This app, in its core, only provides a simple way to structure and run the solutions without needing to juggle multiple binaries.
+It handles project setup, day initialization, and execution of specific parts with minimal friction. 
+
+The goal of this app is at its core to simply create a helpful catalogue structure for Advent of Code repos with a method to easily run the solutions without having to juggle multiple binaries. None of the advanced features are needed, but they're there for those who benefit from them.
 
 ## Features
 
@@ -122,14 +121,20 @@ Dur: 304µs
 Every initiated day's input catalogue gets two empty text files (`input.txt`, `test.txt`) into which you paste that day's puzzle input. Run with `-i` to run the puzzle with a specific input file, eg. `aoc -d 1 -p 2 -i test.txt`. The default is `input.txt`. If the puzzle presents more than one test input, simply create more test input files.
 
 ### Locking
-Aoc remembers the results and durations of each solution's last run. Locking a solution does two things. Firstly, it locks in the result for that solution so that it's not overwritten and instead errors if the solution's result deviates from the locked in result. Secondly, it sees to that the duration for the solution only updates if it's shorter than the shortest recorded duration.
+Aoc remembers the results and durations of each solution's last run. Locking a solution does two things. Firstly, it locks in the result for that solution so that it's not overwritten and instead errors if the solution's result deviates from the locked in result. Secondly, it sees to that the duration for the solution only updates if it's shorter than the shortest recorded duration, and of course was coupled with a correct result.
+
+```shell
+$ aoc puzzle lock -d 1 -p 1
+▣ Locked
+Lock res: 2970687
+Best dur: 304µs
+```
 
 The typical use case for locking a solution is after a correct result has been achieved. Often the first solution is sloppy or naïve. When the solution is locked it gives you the opportunity to experiment and polish your solution and compare results, while getting clear feedback when something has gone wrong. Effectively you've turned your puzzle solution into a simple unit- and performance test testing itself. 
 
 ### Checking
 The `check` command will run all locked puzzles at once and verify their results. Only puzzles which produce correct results get a golden star (*).
 
-Eg.
 ```shell
 $ aoc check
 2024/day1/part1  x      # produced wrong output
@@ -156,6 +161,3 @@ Aoc uses the OS's default caching location to store data. When aoc runs a puzzle
 ### Feature additions
 - I might add a couple of more utilities for parsing input and maybe an iterator.
 - I'll probably add one or two printing utilities for matrices. Writing one's own matrix printing loop isn't the most fun thing in the world just to make a debug print.
-### Technical debt
-- Unit tests to be able to guarantee stability.
-- Better app input (cli args). Right now it works, but it's kind of a mess and needs better input validation.
