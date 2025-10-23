@@ -1,4 +1,4 @@
-package internal
+package commands
 
 import (
 	"fmt"
@@ -62,8 +62,10 @@ func Matrix(data []byte, delimiter string) [][]string {
 	return matrix
 }`
 
-func GenAoc(module string) error {
-	if !files.Exists("go.mod") {
+func (c Commands) GenAoc(module string) error {
+	if files.Exists("go.mod") {
+		fmt.Println("skipping go.mod, already exists")
+	} else {
 		if _, err := exec.CommandAndCapture("go", "mod", "init", module); err != nil {
 			return fmt.Errorf("initiating go.mod: %v", err)
 		}

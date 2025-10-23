@@ -1,4 +1,4 @@
-package internal
+package commands
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/gombrii/aoc/internal/files"
 )
 
-func Status(year, day, part int, input string) error {
+func (c Commands) Status(year, day, part int, input string) error {
 	key := cache.Key(year, day, part, input)
 	if _, exists := cache.ContainsKey(key); !exists {
 		fmt.Printf("No record of running %d/day%d/part%d with %s\n", year, day, part, input)
@@ -42,7 +42,7 @@ Last dur: %s
 	return nil
 }
 
-func Lock(year, day, part int, input string) error {
+func (c Commands) Lock(year, day, part int, input string) error {
 	key := cache.Key(year, day, part, input)
 	if _, exists := cache.ContainsKey(key); !exists {
 		fmt.Printf("No record of running %d/day%d/part%d with %s\n", year, day, part, input)
@@ -70,7 +70,7 @@ Best dur: %s
 	return nil
 }
 
-func Unlock(year, day, part int, input string) error {
+func (c Commands) Unlock(year, day, part int, input string) error {
 	key := cache.Key(year, day, part, input)
 	if _, exists := cache.ContainsKey(key); !exists {
 		fmt.Printf("No record of running %d/day%d/part%d with %s\n", year, day, part, input)

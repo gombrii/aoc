@@ -1,7 +1,7 @@
-package internal
+package commands
 
 import "github.com/gombrii/aoc/internal/cache"
 
-func ClearCache() error {
+func (c Commands) ClearCache() error {
 	return cache.Clear()
 }

@@ -1,4 +1,4 @@
-package internal_test
+package commands_test
 
 import (
 	"os"
@@ -6,26 +6,24 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gombrii/aoc/internal"
-	"github.com/otiai10/copy"
+	"github.com/gombrii/aoc/internal/commands"
 )
 
-// TODO: STOP TESTING OUTPUT: TEST ONLY WHAT EFFECTS OPERATIONS HAVE ON THE FILESYSTEM, GENERATED FILES, CHANGED VALUES, etc.
+//TODO: Add tests to check nothing is generated if erroring out early
+
 func TestLock(t *testing.T) {
 	_, testCache, wd := prepare(t)
+	cmd := commands.Commands{}
 
-	err := copy.Copy(filepath.Join(wd, "testdata", "cache", "2024-day1-part1-input"), filepath.Join(testCache, "2024-day1-part1-input"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	initCache(t, wd, testCache)
 
 	data, _ := os.ReadFile(filepath.Join(testCache, "2024-day1-part1-input", "lock"))
 	if strings.TrimSpace(string(data)) != "false" {
 		t.Error("lock didn't start as false")
 	}
 
-	if err = internal.Lock(2024, 1, 1, "input.txt"); err != nil {
-		t.Error(err)
+	if err := cmd.Lock(2024, 1, 1, "input.txt"); err != nil {
+		t.Errorf("calling Lock: %v", err)
 	}
 
 	data, _ = os.ReadFile(filepath.Join(testCache, "2024-day1-part1-input", "lock"))
@@ -33,7 +31,9 @@ func TestLock(t *testing.T) {
 		t.Error("locking didn't set lock to true")
 	}
 
-	internal.Unlock(2024, 1, 1, "input.txt")
+	if err := cmd.Unlock(2024, 1, 1, "input.txt"); err != nil {
+		t.Errorf("calling Unlock: %v", err)
+	}
 
 	data, _ = os.ReadFile(filepath.Join(testCache, "2024-day1-part1-input", "lock"))
 	if string(data) != "false" {
@@ -43,7 +43,7 @@ func TestLock(t *testing.T) {
 
 func TestStatusNotExists(t *testing.T) {
 	_, _, _ = prepare(t)
-	if err := internal.Lock(2024, 1, 1, "input.txt"); err != nil {
-		t.Error(err)
+	if err := (commands.Commands{}).Lock(2024, 1, 1, "input.txt"); err != nil {
+		t.Errorf("calling Lock: %v", err)
 	}
 }

@@ -1,4 +1,4 @@
-package internal
+package commands
 
 import (
 	"bytes"
@@ -75,7 +75,7 @@ func write(path string, data string) {
 	}
 }`
 
-func Run(year, day, part int, input string) error {
+func (c Commands) Run(year, day, part int, input string) error {
 	if !files.Exists("go.mod") {
 		return errors.New("not in Go module root (no go.mod found)")
 	}

@@ -1,4 +1,4 @@
-package internal
+package commands
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ type printable struct {
 	result string
 }
 
-func Check() error {
+func (c Commands) Check() error {
 	ch := make(chan outcome)
 	wg := sync.WaitGroup{}
 	puzzles := make([]printable, 0)

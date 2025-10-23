@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"errors"
@@ -10,14 +10,15 @@ import (
 )
 
 const (
-	opPuzzleRun    = "puzzle run"
-	opPuzzleStatus = "puzzle status"
-	opPuzzleLock   = "puzzle lock"
-	opPuzzleUnlock = "puzzle unlock"
-	opInitModule   = "init -m"
-	opInitDay      = "init -d"
-	opCacheClear   = "cache clear"
-	opCheck        = "check"
+	opPuzzleRunShort = ""
+	opPuzzleRun      = "puzzlerun"
+	opPuzzleStatus   = "puzzlestatus"
+	opPuzzleLock     = "puzzlelock"
+	opPuzzleUnlock   = "puzzleunlock"
+	opInitModule     = "init-m"
+	opInitDay        = "init-d"
+	opCacheClear     = "cacheclear"
+	opCheck          = "check"
 )
 
 const usage = `Usage:
@@ -49,15 +50,15 @@ Concepts:
   • Checking makes it easy to verify function of modified shared code.
 `
 
-type commands struct {
-	Run        func(year, day, part int, input string) error
-	Status     func(year, day, part int, input string) error
-	Lock       func(year, day, part int, input string) error
-	Unlock     func(year, day, part int, input string) error
-	GenDay     func(year, day int) error
-	GenAoc     func(module string) error
-	Check      func() error
-	ClearCache func() error
+type Commands interface {
+	Run(year, day, part int, input string) error
+	Status(year, day, part int, input string) error
+	Lock(year, day, part int, input string) error
+	Unlock(year, day, part int, input string) error
+	GenDay(year, day int) error
+	GenAoc(module string) error
+	Check() error
+	ClearCache() error
 }
 
 type input struct {
@@ -69,7 +70,7 @@ type input struct {
 	module string
 }
 
-func start(cmd commands, args ...string) error {
+func Start(cmd Commands, args ...string) error {
 	if len(args) == 0 || len(args) == 1 && args[0] == "help" {
 		fmt.Println(strings.ReplaceAll(usage, "{{year}}", fmt.Sprint(defaultInput().year)))
 		return nil
@@ -83,6 +84,8 @@ func start(cmd commands, args ...string) error {
 	if err := validate(in); err != nil {
 		return err
 	}
+
+	injectDefault(&in)
 
 	switch in.op {
 	case opPuzzleRun:
@@ -111,18 +114,24 @@ func start(cmd commands, args ...string) error {
 }
 
 func parseInput(args []string) (input, error) {
-	in := defaultInput()
-	op := make([]string, 0)
+	in := input{}
 
 	i := 0
+	// Parse subcommands
 	for j, arg := range args {
 		i = j
 		if strings.HasPrefix(arg, "-") {
 			break
 		}
-		op = append(op, arg)
+
+		in.op += arg
+
+		if i+1 == len(args) {
+			return in, nil
+		}
 	}
 
+	// Parse flags
 	for param, val := range paramVals(args[i:]) {
 		switch param {
 		case "-y", "--year":
@@ -161,18 +170,14 @@ func parseInput(args []string) (input, error) {
 		}
 	}
 
-	if len(op) > 0 && op[0] == "init" {
+	if in.op == "init" {
 		if in.module != "" {
-			op = append(op, "-m")
+			in.op += "-m"
 		} else if in.day != 0 {
-			op = append(op, "-d")
+			in.op += "-d"
 		} else {
 			return input{}, errors.New("ambiguous call to init, no -d or -m arguments passed")
 		}
-	}
-
-	if len(op) > 0 {
-		in.op = strings.Join(op, " ")
 	}
 
 	return in, nil
@@ -180,34 +185,79 @@ func parseInput(args []string) (input, error) {
 
 func validate(in input) error {
 	switch in.op {
-	case opPuzzleRun, opPuzzleStatus, opPuzzleLock, opPuzzleUnlock:
-		if in.year == 0 {
-			return errors.New("year (-y) is required")
-		}
+	case opPuzzleRunShort, opPuzzleRun, opPuzzleStatus, opPuzzleLock, opPuzzleUnlock:
 		if in.day == 0 {
 			return errors.New("day (-d) is required")
 		}
 		if in.part > 2 || in.part < 1 {
 			return errors.New("part (-p) not set to valid value {1|2}")
 		}
-	case opInitDay:
-		if in.year == 0 {
-			return errors.New("year (-y) is required")
+		if in.module != "" {
+			return errors.New(`unknown flag "-m"`)
 		}
+	case opInitDay:
 		if in.day == 0 {
 			return errors.New("day (-d) is required")
+		}
+		if in.part != 0 {
+			return errors.New(`unknown flag "-p"`)
+		}
+		if in.module != "" {
+			return errors.New(`unknown flag "-m"`)
+		}
+		if in.input != "" {
+			return errors.New(`unknown flag "-i"`)
 		}
 	case opInitModule:
 		if in.module == "" {
 			return errors.New("module name (-m) is required")
 		}
+		if in.year != 0 {
+			return errors.New(`unknown flag "-y"`)
+		}
+		if in.day != 0 {
+			return errors.New(`unknown flag "-d"`)
+		}
+		if in.part != 0 {
+			return errors.New(`unknown flag "-p"`)
+		}
+		if in.input != "" {
+			return errors.New(`unknown flag "-i"`)
+		}
 	case opCacheClear, opCheck:
-		// No args
+		if in.year != 0 {
+			return errors.New(`unknown flag "-y"`)
+		}
+		if in.day != 0 {
+			return errors.New(`unknown flag "-d"`)
+		}
+		if in.part != 0 {
+			return errors.New(`unknown flag "-p"`)
+		}
+		if in.input != "" {
+			return errors.New(`unknown flag "-i"`)
+		}
+		if in.module != "" {
+			return errors.New(`unknown flag "-m"`)
+		}
 	default:
 		return fmt.Errorf("invalid command %q", in.op)
 	}
 
 	return nil
+}
+
+func injectDefault(in *input) {
+	def := defaultInput()
+	if in.year == 0 {
+		in.year = def.year
+	}
+	if in.op == "" {
+		in.op = def.op
+	}
+	if in.input == "" {
+		in.input = def.input
+	}
 }
 
 func defaultInput() input {

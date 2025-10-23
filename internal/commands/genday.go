@@ -1,4 +1,4 @@
-package internal
+package commands
 
 import (
 	"fmt"
@@ -28,7 +28,7 @@ func Part2(data []byte) any {
 const commonTmpl = `// Package {{.DayName}} solves puzzle available on https://adventofcode.com/{{.Year}}/day/{{.Day}}
 package {{.DayName}}`
 
-func GenDay(year, day int) error {
+func (c Commands) GenDay(year, day int) error {
 	yName := fmt.Sprintf("%d", year)
 	dName := fmt.Sprintf("day%d", day)
 
