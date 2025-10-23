@@ -1,6 +1,7 @@
 package commands_test
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -8,16 +9,22 @@ import (
 	"github.com/otiai10/copy"
 )
 
-//TODO: Add tests to check nothing is generated if erroring out early
-
 func TestRun(t *testing.T) {
-	testRoot, _, wd := prepare(t)
+	testRoot, testCache, wd := prepare(t)
 
 	initMod(t, wd, testRoot)
 	initDay(t, wd, testRoot)
 
+	if _, err := os.Stat(filepath.Join(testCache, "2024-day1-part1-input")); err == nil {
+		t.Error("Cache already exists")
+	}
+
 	if err := (commands.Commands{}).Run(2024, 1, 1, "input.txt"); err != nil {
 		t.Errorf("calling Run: %v", err)
+	}
+
+	if _, err := os.Stat(filepath.Join(testCache, "2024-day1-part1-input")); err != nil {
+		t.Error("Run wasn't cached")
 	}
 }
 
@@ -36,7 +43,7 @@ func TestRunError(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			testRoot, _, wd := prepare(t)
+			testRoot, testCache, wd := prepare(t)
 
 			initMod(t, wd, testRoot)
 			initDay(t, wd, testRoot)
@@ -51,6 +58,50 @@ func TestRunError(t *testing.T) {
 			if err := (commands.Commands{}).Run(2024, 1, 1, "input.txt"); err != nil {
 				t.Errorf("calling Run: %v", err)
 			}
+
+			if _, err := os.Stat(filepath.Join(testCache, "2024-day1-part1-input")); err != nil {
+				t.Error("Run wasn't cached")
+			}
 		})
+	}
+}
+
+func TestRunNoMod(t *testing.T) {
+	testRoot, testCache, wd := prepare(t)
+
+	initDay(t, wd, testRoot)
+
+	if err := (commands.Commands{}).Run(2024, 1, 1, "input.txt"); err == nil {
+		t.Error("Calling Run outside module did not return an error")
+	}
+
+	if _, err := os.Stat(filepath.Join(testCache, "2024-day1-part1-input")); err == nil {
+		t.Error("Cache was created despite Run returning error")
+	}
+}
+
+func TestRunNoDay(t *testing.T) {
+	testRoot, testCache, wd := prepare(t)
+
+	initMod(t, wd, testRoot)
+
+	if err := (commands.Commands{}).Run(2024, 1, 1, "input.txt"); err == nil {
+		t.Error("Calling Run without day target did not return an error")
+	}
+
+	if _, err := os.Stat(filepath.Join(testCache, "2024-day1-part1-input")); err == nil {
+		t.Error("Cache was created despite Run returning error")
+	}
+}
+
+func TestRunNeitherModNorDay(t *testing.T) {
+	_, testCache, _ := prepare(t)
+
+	if err := (commands.Commands{}).Run(2024, 1, 1, "input.txt"); err == nil {
+		t.Error("Calling Run outside mod and without day target did not return an error")
+	}
+
+	if _, err := os.Stat(filepath.Join(testCache, "2024-day1-part1-input")); err == nil {
+		t.Error("Cache was created despite Run returning error")
 	}
 }

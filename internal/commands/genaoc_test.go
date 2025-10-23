@@ -7,8 +7,6 @@ import (
 	"github.com/gombrii/aoc/internal/commands"
 )
 
-//TODO: Add tests to check nothing is generated if erroring out early
-
 // TODO: Will fail depending on current go version
 func TestGenAoc(t *testing.T) {
 	testRoot, _, wd := prepare(t)

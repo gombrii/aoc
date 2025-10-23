@@ -12,13 +12,6 @@ import (
 	"github.com/gombrii/aoc/internal/commands"
 )
 
-//TODO: Clean up the command tests. Keep principles:
-// - Don't test output
-// - test that no errors despite erroneous circumstances
-// - test correctly created and modified files from running commands
-//
-// And finally test files, exec and cache packages as well as of course app.
-
 func main() {
 	if err := app.Start(commands.Commands{}, os.Args[1:]...); err != nil {
 		fmt.Println("Error:", err)
