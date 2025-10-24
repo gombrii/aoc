@@ -45,8 +45,9 @@ This is how your project structure should (year may differ) look at this point.
 myaocproject/
 ├── go.mod
 ├── shared/
-│   ├── exit/error.go
-│   └── parse/input.go
+│   ├── exit/...
+│   ├── parse/...
+│   └── render/...
 ├── 2025/
 │   ├── input/
 │   │   └── day1/
@@ -89,7 +90,7 @@ Misc:
 - Each part (Part1, Part2) is implemented as a Go function taking a []byte (puzzle input).
 - The aoc init command:
     - If provided a mod name, eg. `-m mymodule`, creates a mod file with your system's currently installed Go version as well as a couple of utility packages under `shared/` (can be removed if not needed).
-    - If provided a day, eg. `-d 1`, creates the scaffolding for a new day's solutions and input for the given year. If no year, eg. `-y 2023`, is provided the default is the year during which the last Advent of Code started. This means that the default year the majority of time is the previous year. On Dec 1 00:00 UTC-5 when the current years AoC is released the default year flips over to the current year.
+    - If provided a day, eg. `-d 1`, creates the scaffolding for a new day's solutions and input for the given year. If no year, eg. `-y 2023`, is provided the default is the year during which the last Advent of Code started. This means that the default year the majority of time is the previous year. On Dec 1 00:00 UTC-5 when the current year's AoC is released the default year flips over to the current year.
 - The aoc puzzle run command (default):
     1. Invokes the corresponding function.
     1. Prints the result and execution duration.
@@ -106,7 +107,7 @@ func Part1(data []byte) any {
 }
 ```
 
-This is where you write your puzzle solution. The puzzle input is provided as raw bytes. To simplify life, the puzzle solution can be returned as is, without needing any type conversion, after which it's printed to the command line. Every initiated day's solution catalogue, apart from `part1.go` and `part2.go`, also gets a `common.go` file, which is simply a convenient place to store code that might be useful for both parts of the challenge.
+This is where you write your puzzle solution. The puzzle input is provided as raw bytes (that can be parsed using `shared/parse`). To simplify life, the puzzle solution can be returned as is, without needing any type conversion, after which it's printed to the command line. Every initiated day's solution catalogue, apart from `part1.go` and `part2.go`, also gets a `common.go` file, which is simply a convenient place to store code that might be useful for both parts of the challenge.
 
 How running a puzzle looks:
 ```shell
@@ -150,19 +151,28 @@ $ aoc check
 ```
 
 ### Utilities
-At least in my mind, Advent of Code solutions are quick and dirty, thus don't need proper code hygiene. To achieve that, two helper packages are included when initiating the module:
+At least in my mind, Advent of Code solutions are quick and dirty, thus don't need proper code hygiene. To achieve that and other things, a few helper packages are included when initiating the module:
 - shared/parse — for parsing input data into common formats (Lines, String, Matrix, etc.)
 - shared/exit — for exiting quickly in case of error (`exit.If(err)`, `exit.PanicIf(err)`)
 - shared/render — for visualizing data, such as printing and animating 2D grids
+
+```
+shared/
+├── exit/error.go
+├── parse/input.go
+└── render/
+    ├── string.go
+    └── print.go
+```
 
 ### Cache
 Aoc uses the OS's default caching location to store data. When aoc runs a puzzle it generates a binary under the hood which is stored in cache for performance reasons. That's why consecutive runs of the same puzzle tend to get quicker. The cache also stores results and execution times for each puzzle and keeps track of which puzzles are locked. Clearing the cache removes every trace of it from your computer and resets aoc's memory. 
 
 ## Author's notes
 ### Feature additions
-- The application is done and fully featured now.
+- The application is done and fully featured.
 - _Any feedback_ is welcome, both in terms of bugs or opinions on features or utilities.
-- I might add a couple of:
-  - utilities for parsing input
+- I might add a couple of utilities in the shared library:
+  - for parsing input
+  - for rendering
   - iterators
-  - rendering utilities
