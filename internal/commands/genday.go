@@ -48,7 +48,5 @@ func (c Commands) GenDay(year, day int) error {
 		return fmt.Errorf("generating files: %v", err)
 	}
 
-	fmt.Printf("Initiated %s %s\n", dName, yName)
-
 	return nil
 }

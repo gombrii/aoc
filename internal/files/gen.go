@@ -13,6 +13,7 @@ func Gen(structure map[string]string, data map[string]string) error {
 			fmt.Printf("skipping %s, already exists\n", fPath)
 			continue
 		}
+		fmt.Printf("creating %s\n", fPath)
 
 		if err := os.MkdirAll(filepath.Dir(fPath), 0755); err != nil {
 			return fmt.Errorf("creating dir %s: %v", filepath.Dir(fPath), err)

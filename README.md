@@ -153,11 +153,15 @@ $ aoc check
 At least in my mind, Advent of Code solutions are quick and dirty, thus don't need proper code hygiene. To achieve that, two helper packages are included when initiating the module:
 - shared/parse — for parsing input data into common formats (Lines, String, Matrix, etc.)
 - shared/exit — for exiting quickly in case of error (exit.If(err), exit.PanicIf(err))
+- shared/render — for visualizing data, such as printing and animating 2D grids
 
 ### Cache
 Aoc uses the OS's default caching location to store data. When aoc runs a puzzle it generates a binary under the hood which is stored in cache for performance reasons. That's why consecutive runs of the same puzzle tend to get quicker. The cache also stores results and execution times for each puzzle and keeps track of which puzzles are locked. Clearing the cache removes every trace of it from your computer and resets aoc's memory. 
 
 ## Author's notes
 ### Feature additions
-- I might add a couple of more utilities for parsing input and maybe an iterator.
-- I'll probably add one or two printing utilities for matrices. Writing one's own matrix printing loop isn't the most fun thing in the world just to make a debug print.
+- The application is done and fully featured now.
+- I might add a couple of:
+  - utilities for parsing input
+  - iterators
+  - rendering utilities
