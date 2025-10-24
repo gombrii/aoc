@@ -152,7 +152,7 @@ $ aoc check
 ### Utilities
 At least in my mind, Advent of Code solutions are quick and dirty, thus don't need proper code hygiene. To achieve that, two helper packages are included when initiating the module:
 - shared/parse — for parsing input data into common formats (Lines, String, Matrix, etc.)
-- shared/exit — for exiting quickly in case of error (exit.If(err), exit.PanicIf(err))
+- shared/exit — for exiting quickly in case of error (`exit.If(err)`, `exit.PanicIf(err)`)
 - shared/render — for visualizing data, such as printing and animating 2D grids
 
 ### Cache
@@ -161,6 +161,7 @@ Aoc uses the OS's default caching location to store data. When aoc runs a puzzle
 ## Author's notes
 ### Feature additions
 - The application is done and fully featured now.
+- _Any feedback_ is welcome, both in terms of bugs or opinions on features or utilities.
 - I might add a couple of:
   - utilities for parsing input
   - iterators
