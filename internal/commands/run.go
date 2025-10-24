@@ -61,7 +61,7 @@ func main() {
 func read(path string) []byte {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		fmt.Printf("Error: could not read file: %v", err)
+		fmt.Printf("Error: could not read file: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -85,7 +85,10 @@ func (c Commands) Run(year, day, part int, input string) error {
 	pName := fmt.Sprintf("part%d", part)
 
 	if !files.Exists(filepath.Join(yName, "solutions", dName, fmt.Sprintf("%s.go", pName))) {
-		return fmt.Errorf("%v does not exist", filepath.Join(yName, dName, pName))
+		return fmt.Errorf("%s does not exist", filepath.Join(yName, dName, pName))
+	}
+	if !files.Exists(filepath.Join(yName, "input", dName, input)) {
+		return fmt.Errorf("input file %s does not exist for %s", input, filepath.Join(yName, dName))
 	}
 
 	fmt.Printf("Running %s with %s\n", filepath.Join(yName, dName, pName), input)
