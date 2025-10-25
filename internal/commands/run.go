@@ -67,13 +67,14 @@ func read(path string) []byte {
 
 	return data
 }
-	
+
 func write(path string, data string) {
 	if err := os.WriteFile(path, []byte(data), 0755); err != nil {
 		fmt.Printf("Error: could not write file: %v\n", err)
 		os.Exit(1)
 	}
-}`
+}
+`
 
 func (c Commands) Run(year, day, part int, input string) error {
 	if !files.Exists("go.mod") {

@@ -23,13 +23,14 @@ func If(err error) {
 		os.Exit(1)
 	}
 }
-	
+
 // PanicIf panics if err != nil.
 func PanicIf(err error) {
 	if err != nil {
 		panic(err)
 	}
-}`
+}
+`
 
 const parseTmpl = `// Package input does, in the spirit of Advent of Code, provide some common ways to interpret the 
 // puzzles' input data.
@@ -60,7 +61,8 @@ func Matrix(data []byte, delimiter string) [][]string {
 	}
 
 	return matrix
-}`
+}
+`
 
 const stringTmpl = `// Package render provides some ways to visualize data. Useful for debugging or just for fun.
 package render
@@ -145,7 +147,8 @@ func MString[T any](matrix [][]T) string {
 		}
 	}
 	return b.String()
-}`
+}
+`
 
 const printTmpl = `// Package render provides some ways to visualize data. Useful for debugging or just for fun.
 package render
@@ -174,7 +177,8 @@ func Animate(delayMs int, frame string) {
 		fmt.Print("\033[1A")
 		fmt.Print("\033[2K\r")
 	}
-}`
+}
+`
 
 func (c Commands) GenAoc(module string) error {
 	if files.Exists("go.mod") {
