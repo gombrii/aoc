@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+const version = "v0.4.2"
+
 const (
 	opPuzzleRunShort = ""
 	opPuzzleRun      = "puzzlerun"
@@ -27,7 +29,8 @@ const usage = `Usage:
   aoc init   {-d DAY [-y YEAR default: {{year}}] | -m MODULENAME}
   aoc check 
   aoc cache clear
-  aoc help [command]
+  aoc help
+  aoc version
 
 Puzzle commands:
   run          Execute a puzzle (default when no command is given)
@@ -42,7 +45,8 @@ Project setup:
 Misc:
   check            Run all locked puzzles to verify results
   cache clear      Clear cached runners and metadata
-  help             Show this or command-specific help
+  help             Show this help
+  version          Show installed aoc version
 
 Concepts:
   • Puzzle = (year, day, part, input).
@@ -71,8 +75,14 @@ type input struct {
 }
 
 func Start(cmd Commands, args ...string) error {
-	if len(args) == 0 || len(args) == 1 && args[0] == "help" {
+	switch {
+	case len(args) == 0:
+		fallthrough
+	case args[0] == "help":
 		fmt.Println(strings.ReplaceAll(usage, "{{year}}", fmt.Sprint(defaultInput().year)))
+		return nil
+	case args[0] == "version":
+		fmt.Println("aoc", version)
 		return nil
 	}
 
