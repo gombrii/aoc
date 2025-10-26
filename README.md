@@ -140,7 +140,7 @@ The `check` command will run all locked puzzles at once and verify their results
 $ aoc check
 2024/day1/part1  x      # produced wrong output
 2024/day2/part1  *      # produced correct output
-2024/day3/part1  error  # panicked or exited early
+2024/day3/part1  error  # panicked, exited early or even didn't compile
 2024/day4/part1  *
 2024/day5/part1  *
 2024/day6/part1  *
