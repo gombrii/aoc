@@ -13,7 +13,7 @@ func If(err error) {
 		os.Exit(1)
 	}
 }
-	
+
 // PanicIf panics if err != nil.
 func PanicIf(err error) {
 	if err != nil {
