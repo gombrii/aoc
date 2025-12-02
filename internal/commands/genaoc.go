@@ -42,12 +42,18 @@ import (
 
 // Lines returns data as a slice of strings corresponding to the lines of text in the input data.
 func Lines(data []byte) []string {
-	return strings.Split(string(data), "\n")
+	return strings.Split(strings.TrimSpace(string(data)), "\n")
+}
+
+// Parts returns data as a slice of strings corresponding to the parts of text in the input data
+// separated by the given separator.
+func Parts(data []byte, separator string) []string {
+	return strings.Split(strings.TrimSpace(string(data)), separator)
 }
 
 // String returns data as a continuous string.
 func String(data []byte) string {
-	return string(data)
+	return strings.TrimSpace(string(data))
 }
 
 // Matrix returns data as a matrix. The delimiter divides the data into separates columns while rows

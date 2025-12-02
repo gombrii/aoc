@@ -68,7 +68,7 @@ func TestSuccessful(t *testing.T) {
 		"Run": {
 			args:   "-d 1 -p 1",
 			called: "Run",
-			with:   []any{2024, 1, 1, "input.txt"},
+			with:   []any{2025, 1, 1, "input.txt"},
 		},
 		"Run other year": {
 			args:   "-d 1 -y 2023 -p 1",
@@ -78,7 +78,7 @@ func TestSuccessful(t *testing.T) {
 		"Run other input": {
 			args:   "-d 1 -i test.txt -p 1",
 			called: "Run",
-			with:   []any{2024, 1, 1, "test.txt"},
+			with:   []any{2025, 1, 1, "test.txt"},
 		},
 		"Run other year and input": {
 			args:   "-d 1 -i test.txt -p 1 -y 2023",
@@ -88,7 +88,7 @@ func TestSuccessful(t *testing.T) {
 		"Status": {
 			args:   "puzzle status -d 1 -p 1",
 			called: "Status",
-			with:   []any{2024, 1, 1, "input.txt"},
+			with:   []any{2025, 1, 1, "input.txt"},
 		},
 		"Status other year": {
 			args:   "puzzle status -d 1 -y 2023 -p 1",
@@ -98,7 +98,7 @@ func TestSuccessful(t *testing.T) {
 		"Status other input": {
 			args:   "puzzle status -d 1 -i test.txt -p 1",
 			called: "Status",
-			with:   []any{2024, 1, 1, "test.txt"},
+			with:   []any{2025, 1, 1, "test.txt"},
 		},
 		"Status other year and input": {
 			args:   "puzzle status -d 1 -i test.txt -p 1 -y 2023",
@@ -108,7 +108,7 @@ func TestSuccessful(t *testing.T) {
 		"Lock": {
 			args:   "puzzle lock -d 1 -p 1",
 			called: "Lock",
-			with:   []any{2024, 1, 1, "input.txt"},
+			with:   []any{2025, 1, 1, "input.txt"},
 		},
 		"Lock other year": {
 			args:   "puzzle lock -d 1 -y 2023 -p 1",
@@ -118,7 +118,7 @@ func TestSuccessful(t *testing.T) {
 		"Lock other input": {
 			args:   "puzzle lock -d 1 -i test.txt -p 1",
 			called: "Lock",
-			with:   []any{2024, 1, 1, "test.txt"},
+			with:   []any{2025, 1, 1, "test.txt"},
 		},
 		"Lock other year and input": {
 			args:   "puzzle lock -d 1 -i test.txt -p 1 -y 2023",
@@ -128,7 +128,7 @@ func TestSuccessful(t *testing.T) {
 		"Unlock": {
 			args:   "puzzle unlock -d 1 -p 1",
 			called: "Unlock",
-			with:   []any{2024, 1, 1, "input.txt"},
+			with:   []any{2025, 1, 1, "input.txt"},
 		},
 		"Unlock other year": {
 			args:   "puzzle unlock -d 1 -y 2023 -p 1",
@@ -138,7 +138,7 @@ func TestSuccessful(t *testing.T) {
 		"Unlock other input": {
 			args:   "puzzle unlock -d 1 -i test.txt -p 1",
 			called: "Unlock",
-			with:   []any{2024, 1, 1, "test.txt"},
+			with:   []any{2025, 1, 1, "test.txt"},
 		},
 		"Unlock other year and input": {
 			args:   "puzzle unlock -d 1 -i test.txt -p 1 -y 2023",
@@ -148,7 +148,7 @@ func TestSuccessful(t *testing.T) {
 		"GenDay": {
 			args:   "init -d 1",
 			called: "GenDay",
-			with:   []any{2024, 1},
+			with:   []any{2025, 1},
 		},
 		"GenDay other year": {
 			args:   "init -d 1 -y 2023",
