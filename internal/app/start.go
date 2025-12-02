@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const version = "v0.4.2"
+const version = "v0.4.4"
 
 const (
 	opPuzzleRunShort = ""
