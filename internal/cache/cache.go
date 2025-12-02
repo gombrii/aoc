@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
 )
 
@@ -68,9 +67,18 @@ func All() iter.Seq2[int, string] {
 	cache := location()
 	entries, _ := os.ReadDir(cache)
 	sort.Slice(entries, func(i, j int) bool {
-		di, _ := strconv.Atoi(strings.TrimPrefix(strings.Split(entries[i].Name(), "-")[1], "day"))
-		dj, _ := strconv.Atoi(strings.TrimPrefix(strings.Split(entries[j].Name(), "-")[1], "day"))
-		return di < dj
+		yi, di, pi := 0, 0, 0
+		yj, dj, pj := 0, 0, 0
+		_, _ = fmt.Sscanf(entries[i].Name(), "%d-day%d-part%d-", &yi, &di, &pi)
+		_, _ = fmt.Sscanf(entries[j].Name(), "%d-day%d-part%d-", &yj, &dj, &pj)
+
+		if yi != yj {
+			return yi < yj
+		}
+		if di != dj {
+			return di < dj
+		}
+		return pi < pj
 	})
 	return func(yield func(int, string) bool) {
 		for i, e := range entries {
