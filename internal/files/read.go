@@ -11,6 +11,7 @@ const (
 	Res     = "res"
 	Dur     = "dur"
 	Session = "session"
+	Last    = "last"
 )
 
 func ReadAll(files map[string]string) (map[string]string, error) {

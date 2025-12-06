@@ -20,14 +20,8 @@ func (c Commands) Login(session string) error {
 		return fmt.Errorf("pinging server: %v", err)
 	}
 
-	paths, err := files.GenTemp(map[string]string{files.Session: session}, nil)
-	if err != nil {
-		return fmt.Errorf("creating session file: %v", err)
-	}
-
-	_, err = cache.Store(cache.ConfigKey(User), files.Session, paths[files.Session])
-	if err != nil {
-		return fmt.Errorf("caching session token: %v", err)
+	if err = setSession(session); err != nil {
+		return fmt.Errorf("setting session: %v", err)
 	}
 
 	fmt.Println("Logged in as user", username)
@@ -47,4 +41,25 @@ func LoggedIn() (string, bool) {
 	}
 
 	return string(data), true
+}
+
+func setSession(session string) error {
+	cPath, ok := cache.Contains(cache.ConfigKey(User), files.Session)
+	if !ok {
+		paths, err := files.GenTemp(map[string]string{files.Session: session}, nil)
+		if err != nil {
+			return fmt.Errorf("creating file: %v", err)
+		}
+
+		_, err = cache.Store(cache.ConfigKey(User), files.Session, paths[files.Session])
+		if err != nil {
+			return fmt.Errorf("caching token: %v", err)
+		}
+
+		return nil
+	}
+
+	files.Write(cPath, []byte(session))
+
+	return nil
 }

@@ -9,33 +9,33 @@ import (
 	"strings"
 )
 
-type key struct {
+type Key struct {
 	namespace string
-	id        string
+	ID        string
 }
 
-func ConfigKey(config string) key {
-	return key{
+func ConfigKey(config string) Key {
+	return Key{
 		namespace: "config",
-		id:        config,
+		ID:        config,
 	}
 }
 
-func PuzzleKey(year, day, part int, input string) key {
-	return key{
+func PuzzleKey(year, day, part int, input string) Key {
+	return Key{
 		namespace: "puzzles",
-		id:        fmt.Sprintf("%d-day%d-part%d-%s", year, day, part, strings.TrimSuffix(input, ".txt")),
+		ID:        fmt.Sprintf("%d-day%d-part%d-%s", year, day, part, strings.TrimSuffix(input, ".txt")),
 	}
 }
 
-func MakePath(key key, file string) string {
+func MakePath(key Key, file string) string {
 	cache := location()
-	return filepath.Join(cache, key.namespace, key.id, file)
+	return filepath.Join(cache, key.namespace, key.ID, file)
 }
 
-func ContainsKey(key key) (string, bool) {
+func ContainsKey(key Key) (string, bool) {
 	cache := location()
-	path := filepath.Join(cache, key.namespace, key.id)
+	path := filepath.Join(cache, key.namespace, key.ID)
 
 	if _, err := os.Stat(path); err != nil {
 		return "", false
@@ -44,9 +44,9 @@ func ContainsKey(key key) (string, bool) {
 	return path, true
 }
 
-func Contains(key key, file string) (string, bool) {
+func Contains(key Key, file string) (string, bool) {
 	cache := location()
-	path := filepath.Join(cache, key.namespace, key.id, file)
+	path := filepath.Join(cache, key.namespace, key.ID, file)
 
 	if _, err := os.Stat(path); err != nil {
 		return "", false
@@ -55,9 +55,9 @@ func Contains(key key, file string) (string, bool) {
 	return path, true
 }
 
-func Store(key key, fileName string, src string) (string, error) {
+func Store(key Key, fileName string, src string) (string, error) {
 	cPath := location()
-	dPath := filepath.Join(cPath, key.namespace, key.id)
+	dPath := filepath.Join(cPath, key.namespace, key.ID)
 	dst := filepath.Join(dPath, fileName)
 
 	if _, err := os.Stat(src); err != nil {

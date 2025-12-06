@@ -103,6 +103,8 @@ func (c Commands) Run(year, day, part int, input string) error {
 		return fmt.Errorf("executing runner: %v", err)
 	}
 
+	setLastRun(cache.PuzzleKey(year, day, part, input))	
+
 	return nil
 }
 
@@ -176,4 +178,25 @@ func currentModulePath() (string, error) {
 		return "", errors.New("module path not found in go.mod")
 	}
 	return f.Module.Mod.Path, nil
+}
+
+func setLastRun(key cache.Key) error {
+	cPath, ok := cache.Contains(cache.ConfigKey(User), files.Last)
+	if !ok {
+		paths, err := files.GenTemp(map[string]string{files.Last: key.ID}, nil)
+		if err != nil {
+			return fmt.Errorf("creating file: %v", err)
+		}
+
+		_, err = cache.Store(cache.ConfigKey(User), files.Last, paths[files.Last])
+		if err != nil {
+			return fmt.Errorf("caching last run puzzle: %v", err)
+		}
+
+		return nil
+	}
+
+	files.Write(cPath, []byte(key.ID))
+
+	return nil
 }
