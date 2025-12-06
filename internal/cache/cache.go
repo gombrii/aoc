@@ -1,41 +1,38 @@
 package cache
 
 import (
+	"errors"
 	"fmt"
 	"iter"
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 )
 
-type Key struct {
-	namespace string
-	ID        string
-}
-
-func ConfigKey(config string) Key {
-	return Key{
-		namespace: "config",
-		ID:        config,
+func ParsePuzzleKey(keyID string) (PuzzleKey, error) {
+	var year, day, part int
+	var input string
+	n, err := fmt.Sscanf(keyID, "%d-day%d-part%d-%s", &year, &day, &part, &input)
+	if err != nil {
+		return PuzzleKey{}, fmt.Errorf("parsing cache key ID: %v", err)
 	}
-}
-
-func PuzzleKey(year, day, part int, input string) Key {
-	return Key{
-		namespace: "puzzles",
-		ID:        fmt.Sprintf("%d-day%d-part%d-%s", year, day, part, strings.TrimSuffix(input, ".txt")),
+	if n != 4 {
+		return PuzzleKey{}, errors.New("failed parsing all parts of the cache key ID")
 	}
+
+	input += ".txt"
+
+	return PuzzleKey{year, day, part, input}, nil
 }
 
 func MakePath(key Key, file string) string {
 	cache := location()
-	return filepath.Join(cache, key.namespace, key.ID, file)
+	return filepath.Join(cache, key.namespace(), key.ID(), file)
 }
 
 func ContainsKey(key Key) (string, bool) {
 	cache := location()
-	path := filepath.Join(cache, key.namespace, key.ID)
+	path := filepath.Join(cache, key.namespace(), key.ID())
 
 	if _, err := os.Stat(path); err != nil {
 		return "", false
@@ -46,7 +43,7 @@ func ContainsKey(key Key) (string, bool) {
 
 func Contains(key Key, file string) (string, bool) {
 	cache := location()
-	path := filepath.Join(cache, key.namespace, key.ID, file)
+	path := filepath.Join(cache, key.namespace(), key.ID(), file)
 
 	if _, err := os.Stat(path); err != nil {
 		return "", false
@@ -57,7 +54,7 @@ func Contains(key Key, file string) (string, bool) {
 
 func Store(key Key, fileName string, src string) (string, error) {
 	cPath := location()
-	dPath := filepath.Join(cPath, key.namespace, key.ID)
+	dPath := filepath.Join(cPath, key.namespace(), key.ID())
 	dst := filepath.Join(dPath, fileName)
 
 	if _, err := os.Stat(src); err != nil {

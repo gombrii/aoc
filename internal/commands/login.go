@@ -30,7 +30,7 @@ func (c Commands) Login(session string) error {
 }
 
 func LoggedIn() (string, bool) {
-	path, ok := cache.Contains(cache.ConfigKey(User), files.Session)
+	path, ok := cache.Contains(cache.ConfigKey{Domain: User}, files.Session)
 	if !ok {
 		return "", false
 	}
@@ -44,14 +44,14 @@ func LoggedIn() (string, bool) {
 }
 
 func setSession(session string) error {
-	cPath, ok := cache.Contains(cache.ConfigKey(User), files.Session)
+	cPath, ok := cache.Contains(cache.ConfigKey{Domain: User}, files.Session)
 	if !ok {
 		paths, err := files.GenTemp(map[string]string{files.Session: session}, nil)
 		if err != nil {
 			return fmt.Errorf("creating file: %v", err)
 		}
 
-		_, err = cache.Store(cache.ConfigKey(User), files.Session, paths[files.Session])
+		_, err = cache.Store(cache.ConfigKey{Domain: User}, files.Session, paths[files.Session])
 		if err != nil {
 			return fmt.Errorf("caching token: %v", err)
 		}

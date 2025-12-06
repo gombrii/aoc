@@ -9,7 +9,7 @@ import (
 )
 
 func GetExampleInput(client *Client, year, day int) (string, error) {
-	resp, err := client.get(fmt.Sprintf("/%d/day/%d", year, day))
+	resp, err := client.Get(fmt.Sprintf("/%d/day/%d", year, day))
 	if err != nil {
 		return "", err
 	}

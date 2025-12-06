@@ -35,7 +35,7 @@ func (c *Client) Post(path, body string) (string, error) {
 	return send(c, req, c.Session)
 }
 
-func (c *Client) get(path string) (string, error) {
+func (c *Client) Get(path string) (string, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s%s", c.Address, path), nil)
 	if err != nil {
 		return "", fmt.Errorf("creating request: %v", err)

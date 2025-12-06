@@ -62,6 +62,10 @@ func (c *commands) Login(session string) error {
 	c.record.save(session)
 	return nil
 }
+func (c *commands) Submit() error {
+	c.record.save()
+	return nil
+}
 
 func TestSuccessful(t *testing.T) {
 	for name, params := range map[string]struct {
@@ -178,6 +182,11 @@ func TestSuccessful(t *testing.T) {
 			args:   "login -s abc123",
 			called: "Login",
 			with:   []any{"abc123"},
+		},
+		"Submit": {
+			args:   "submit",
+			called: "Submit",
+			with:   []any{},
 		},
 	} {
 		t.Run(name, func(t *testing.T) {

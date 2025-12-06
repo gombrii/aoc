@@ -22,6 +22,7 @@ const (
 	opCacheClear     = "cacheclear"
 	opCheck          = "check"
 	opLogin          = "login"
+	opSubmit         = "submit"
 )
 
 const usage = `Usage:
@@ -65,6 +66,7 @@ type Commands interface {
 	Check() error
 	ClearCache() error
 	Login(session string) error
+	Submit() error
 }
 
 type input struct {
@@ -119,6 +121,8 @@ func Start(cmd Commands, args ...string) error {
 		err = cmd.Check()
 	case opLogin:
 		err = cmd.Login(in.sesion)
+	case opSubmit:
+		err = cmd.Submit()
 	}
 
 	if err != nil {
@@ -272,7 +276,7 @@ func validate(in input) error {
 		if in.input != "" {
 			return errors.New(`unknown flag "-i"`)
 		}
-	case opCacheClear, opCheck:
+	case opCacheClear, opCheck, opSubmit:
 		if in.year != 0 {
 			return errors.New(`unknown flag "-y"`)
 		}

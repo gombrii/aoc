@@ -8,7 +8,7 @@ import (
 )
 
 func Ping(client *Client) (string, error) {
-	resp, err := client.get("/2025/settings")
+	resp, err := client.Get("/2025/settings")
 	if err != nil {
 		return "", err
 	}

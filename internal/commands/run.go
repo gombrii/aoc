@@ -103,13 +103,13 @@ func (c Commands) Run(year, day, part int, input string) error {
 		return fmt.Errorf("executing runner: %v", err)
 	}
 
-	setLastRun(cache.PuzzleKey(year, day, part, input))	
+	setLastRun(cache.PuzzleKey{Year: year, Day: day, Part: part, Input: input})
 
 	return nil
 }
 
 func getRunnerPath(year, day, part int, input string) (string, error) {
-	cacheKey := cache.PuzzleKey(year, day, part, input)
+	cacheKey := cache.PuzzleKey{Year: year, Day: day, Part: part, Input: input}
 
 	if cPath, ok := cache.Contains(cacheKey, files.Runner); ok {
 		return cPath, nil
@@ -181,14 +181,14 @@ func currentModulePath() (string, error) {
 }
 
 func setLastRun(key cache.Key) error {
-	cPath, ok := cache.Contains(cache.ConfigKey(User), files.Last)
+	cPath, ok := cache.Contains(cache.ConfigKey{Domain: User}, files.LastRun)
 	if !ok {
-		paths, err := files.GenTemp(map[string]string{files.Last: key.ID}, nil)
+		paths, err := files.GenTemp(map[string]string{files.LastRun: key.ID()}, nil)
 		if err != nil {
 			return fmt.Errorf("creating file: %v", err)
 		}
 
-		_, err = cache.Store(cache.ConfigKey(User), files.Last, paths[files.Last])
+		_, err = cache.Store(cache.ConfigKey{Domain: User}, files.LastRun, paths[files.LastRun])
 		if err != nil {
 			return fmt.Errorf("caching last run puzzle: %v", err)
 		}
@@ -196,7 +196,7 @@ func setLastRun(key cache.Key) error {
 		return nil
 	}
 
-	files.Write(cPath, []byte(key.ID))
+	files.Write(cPath, []byte(key.ID()))
 
 	return nil
 }
