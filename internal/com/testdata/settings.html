@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Settings - Advent of Code 2025</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css?32" />
+    <link rel="stylesheet alternate" type="text/css" href="/static/highcontrast.css?2" title="High Contrast" />
+    <link rel="shortcut icon" href="/favicon.png" />
+    <script>window.addEventListener('click', function (e, s, r) { if (e.target.nodeName === 'CODE' && e.detail === 3) { s = window.getSelection(); s.removeAllRanges(); r = document.createRange(); r.selectNodeContents(e.target); s.addRange(r); } });</script>
+</head><!--
+
+
+
+
+Oh, hello!  Funny seeing you here.
+
+I appreciate your enthusiasm, but you aren't going to find much down here.
+There certainly aren't clues to any of the puzzles.  The best surprises don't
+even appear in the source until you unlock them for real.
+
+Please be careful with automated requests; I'm not a massive company, and I can
+only take so much traffic.  Please be considerate so that everyone gets to play.
+
+If you're curious about how Advent of Code works, it's running on some custom
+Perl code. Other than a few integrations (auth, analytics, social media), I
+built the whole thing myself, including the design, animations, prose, and all
+of the puzzles.
+
+The puzzles are most of the work; preparing a new calendar and a new set of
+puzzles takes all of my free time for months every year. A lot of effort went
+into building this thing - I hope you're enjoying playing it as much as I
+enjoyed making it for you!
+
+If you'd like to hang out, I'm @was.tl on Bluesky and @ericwastl@hachyderm.io
+on Mastodon.
+
+- Eric Wastl
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-->
+
+<body>
+    <header>
+        <div>
+            <h1 class="title-global"><a href="/">Advent of Code</a></h1>
+            <nav>
+                <ul>
+                    <li><a href="/2025/about">[About]</a></li>
+                    <li><a href="/2025/events">[Events]</a></li>
+                    <li><a href="/2025/shop">[Shop]</a></li>
+                    <li><a href="/2025/settings">[Settings]</a></li>
+                    <li><a href="/2025/auth/logout">[Log Out]</a></li>
+                </ul>
+            </nav>
+            <div class="user">Simon Gombrii <span class="star-count">10*</span></div>
+        </div>
+        <div>
+            <h1 class="title-event">&nbsp;&nbsp;<span class="title-event-wrap">0.0.0.0:</span><a
+                    href="/2025">2025</a><span class="title-event-wrap"></span></h1>
+            <nav>
+                <ul>
+                    <li><a href="/2025">[Calendar]</a></li>
+                    <li><a href="/2025/support">[AoC++]</a></li>
+                    <li><a href="/2025/sponsors">[Sponsors]</a></li>
+                    <li><a href="/2025/leaderboard/private">[Leaderboards]</a></li>
+                    <li><a href="/2025/stats">[Stats]</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div id="sidebar">
+        <div id="sponsor">
+            <div class="quiet">Our <a href="/2025/sponsors">sponsors</a> help make Advent of Code possible:</div>
+            <div class="sponsor"><a href="/2025/sponsors/redirect?url=https%3A%2F%2Fkotl%2Ein%2Faoc2025" target="_blank"
+                    onclick="if(ga)ga('send','event','sponsor','sidebar',this.href);" rel="noopener">Kotlin by
+                    JetBrains</a> - Join our series of 5 festive livestreams on Dec 1-5 to tackle puzzles in Kotlin with
+                fun guests, warm community, and prizes to win!</div>
+        </div>
+    </div><!--/sidebar-->
+
+    <main>
+        <article>
+            <p>What would you like to be called?</p>
+            <script>function anon(a) { document.getElementById("display_url").disabled = a; }</script>
+            <form id="settings" action="settings/save" method="post" style="width:45em;">
+                <input type="hidden" name="csrf_token"
+                    value="53616c7465645f5f422f2a0406ccbdcdc0053749ea847c0b204abcc48dee3f27a156e1a70e1d426b3ef715a5fa7b561dd666de3e85ef0367cbb8976691264235" />
+                <div><label><input type="radio" name="display_name" onchange="anon(true)"
+                            value="anonymous" /><span>(anonymous user #606055)</span></label></div>
+                <div><label><input type="radio" name="display_name" onchange="anon(false)" value="0"
+                            checked="checked" /><span><img src="https://avatars.githubusercontent.com/u/34093557?v=4"
+                                height="20" />Simon Gombrii</span></label></div>
+                <div><label><input type="radio" name="display_name" onchange="anon(false)" value="1" /><span><img
+                                src="https://avatars.githubusercontent.com/u/34093557?v=4"
+                                height="20" />gombrii</span></label></div>
+                <p><label><input type="checkbox" id="display_url" name="display_url" value="1"
+                            checked="checked" /><span>Link to https://github.com/gombrii</span></label></p>
+                <p>Sponsor join code: <input type="text" name="sponsor_join"
+                        oninput="document.getElementById('sponsor-privboard-warning').classList[/-/.exec(this.value)?'add':'remove']('warning-active')" />
+                    <span class="quiet">(Leave blank unless you are an employee (or similar) of a sponsor. </span><span
+                        id="sponsor-privboard-warning" class="quiet warning">Not for <a
+                            href="/2025/leaderboard/private">private leaderboard</a> codes.</span><span
+                        class="quiet">)</span></p>
+                <p style="margin-bottom:3em;"><input type="submit" value="[Save]" /></p>
+            </form>
+            <p style="width:45em;">Advanced actions:</p>
+            <ul style="width:45em;">
+                <li>Provide <span
+                        class="hidden-until-hover"><code>ownerproof-606055-1764983116-fceda41cc8c8</code></span> if you
+                    are asked to prove you own this account by an Advent of Code administrator. Don't post this code in
+                    a public place.</li>
+                <li>
+                    <form action="settings/transfer-out" method="post" style="width:45em;"><input type="hidden"
+                            name="csrf_token"
+                            value="53616c7465645f5f422f2a0406ccbdcdc0053749ea847c0b204abcc48dee3f27a156e1a70e1d426b3ef715a5fa7b561dd666de3e85ef0367cbb8976691264235" />You
+                        can <input type="submit" value="[Transfer your data to another account]" /> if you want to
+                        change your authentication method. The destination account needs to be empty.</form>
+                </li>
+            </ul>
+        </article>
+    </main>
+
+    <!-- ga -->
+    <script>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date(); a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-69522494-1', 'auto');
+        ga('set', 'anonymizeIp', true);
+        ga('send', 'pageview');
+    </script>
+    <!-- /ga -->
+</body>
+
+</html>
