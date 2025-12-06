@@ -4,12 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"iter"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
 )
-
-const version = "v0.4.4"
 
 const (
 	opPuzzleRunShort = ""
@@ -26,34 +25,40 @@ const (
 )
 
 const usage = `Usage:
-  aoc [puzzle run] <params>
-  aoc puzzle {run|status|lock|unlock} -d DAY -p {1|2} [-y YEAR default: {{year}}] [-i INPUT default: input.txt]
-  aoc init   {-d DAY [-y YEAR default: {{year}}] | -m MODULENAME}
+  aoc -d DAY -p {1|2} [-y YEAR def: {{year}}] [-i INPUT def: input.txt]
+  aoc init   {-d DAY [-y YEAR def: {{year}}] | -m MODULENAME}
+  aoc submit 
+  aoc login -s SESSION 
   aoc check 
   aoc cache clear
-  aoc help
+  aoc help [-v]
   aoc version
 
-Puzzle commands:
-  run          Execute a puzzle (default when no command is given)
-  status       Show last/locked result and last/best duration of of puzzle
-  lock         Lock result -> future runs error if they deviate, remembers fastest duration
-  unlock       Unlock result -> remember only last run
+Run and submit:
+  aoc              Run a puzzle solution
+  submit           Submit the result of your last run puzzle (requires login)
 
 Project setup:
-  init --day       Scaffold solution files for a new day
+  init --day       Scaffold solution files for a new day (pull puzzle input from server if logged in)
   init --module    Create a new AoC module structure
 
 Misc:
+  login            Enables pulling of puzzle input and submission of solutions to server
   check            Run all locked puzzles to verify results
-  cache clear      Clear cached runners and metadata
+  cache clear      Delete all data created and kept by aoc
   help             Show this help
   version          Show installed aoc version
+`
 
-Concepts:
-  • Puzzle = (year, day, part, input).
-  • Locked puzzles act like tests: runs must match locked results.
-  • Checking makes it easy to verify function of modified shared code.
+const usageAppentix = `
+Legacy commands:
+  aoc {status|lock|unlock} -d DAY -p {1|2} [-y YEAR current default: {{year}}] [-i INPUT default: input.txt]
+
+  status       Show last/locked result and last/best duration of of puzzle
+               (this is also shown after running the puzzle)
+  lock         Lock result -> future runs error if result differ, remembers fastest duration
+               (sumitting correct result with 'aoc submit' locks the result automatically)
+  unlock       Unlock result -> remember only last run
 `
 
 type Commands interface {
@@ -81,13 +86,16 @@ type input struct {
 
 func Start(cmd Commands, args ...string) error {
 	switch {
-	case len(args) == 0:
-		fallthrough
-	case args[0] == "help":
+	case len(args) == 2 && args[0] == "help" && args[1] == "-v":
+		defYear := fmt.Sprint(defaultInput().year)
+		fmt.Println(strings.ReplaceAll(usage, "{{year}}", defYear))
+		fmt.Println(strings.ReplaceAll(usageAppentix, "{{year}}", defYear))
+		return nil
+	case len(args) == 0 || args[0] == "help":
 		fmt.Println(strings.ReplaceAll(usage, "{{year}}", fmt.Sprint(defaultInput().year)))
 		return nil
 	case args[0] == "version":
-		fmt.Println("aoc", version)
+		fmt.Println("aoc", version())
 		return nil
 	}
 
@@ -344,4 +352,12 @@ func paramVals(args []string) iter.Seq2[string, string] {
 			}
 		}
 	}
+}
+
+func version() string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return "unknown"
+	}
+	return info.Main.Version
 }
