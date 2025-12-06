@@ -255,7 +255,7 @@ func validate(in input) error {
 		}
 	case opLogin:
 		if in.sesion == "" {
-			return errors.New("sesion token (-s) is required")
+			return errors.New("session token (-s) is required")
 		}
 		if in.module != "" {
 			return errors.New(`unknown flag "-m"`)

@@ -15,14 +15,17 @@ func (c Commands) Login(session string) error {
 	username, err := com.Ping(com.NewClient(session))
 	if err != nil {
 		if errors.Is(err, com.ErrUnauthorized) {
-			fmt.Println("Invalid session token")
-			return nil
+			return errors.New("invalid session token")
 		}
 		return fmt.Errorf("pinging server: %v", err)
 	}
 
-	cPath := cache.MakePath(cache.ConfigKey(User), files.Session)
-	err = files.Write(cPath, []byte(session))
+	paths, err := files.GenTemp(map[string]string{files.Session: session}, nil)
+	if err != nil {
+		return fmt.Errorf("creating session file: %v", err)
+	}
+
+	_, err = cache.Store(cache.ConfigKey(User), files.Session, paths[files.Session])
 	if err != nil {
 		return fmt.Errorf("caching session token: %v", err)
 	}
