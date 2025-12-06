@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	ErrAnswerHigh = errors.New("answer is too high")
-	ErrAnswerLow  = errors.New("answer is too low")
+	ErrAnswerHigh    = errors.New("answer is too high")
+	ErrAnswerLow     = errors.New("answer is too low")
+	ErrAlreadySolved = errors.New("puzzle already solved")
 )
 
 func Submit(client *Client, year, day, part int, answer string) error {
@@ -40,6 +41,8 @@ func checkResult(html string) error {
 		return ErrAnswerLow
 	case strings.Contains(sel.Text(), "That's not the right answer; your answer is too high"):
 		return ErrAnswerHigh
+	case strings.Contains(sel.Text(), "Did you already complete it?"):
+		return ErrAlreadySolved
 	//TODO: more cases
 	// - waaaaay to high
 	// - waaaaay to low

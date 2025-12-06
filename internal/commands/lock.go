@@ -10,7 +10,7 @@ import (
 )
 
 func (c Commands) Status(year, day, part int, input string) error {
-	key := cache.PuzzleKey(year, day, part, input)
+	key := cache.PuzzleKey{Year: year, Day: day, Part: part, Input: input}
 	if _, exists := cache.ContainsKey(key); !exists {
 		fmt.Printf("No record of running %d/day%d/part%d with %s\n", year, day, part, input)
 		return nil
@@ -43,7 +43,7 @@ Last dur: %s
 }
 
 func (c Commands) Lock(year, day, part int, input string) error {
-	key := cache.PuzzleKey(year, day, part, input)
+	key := cache.PuzzleKey{Year: year, Day: day, Part: part, Input: input}
 	if _, exists := cache.ContainsKey(key); !exists {
 		fmt.Printf("No record of running %d/day%d/part%d with %s\n", year, day, part, input)
 		return nil
@@ -71,7 +71,7 @@ Best dur: %s
 }
 
 func (c Commands) Unlock(year, day, part int, input string) error {
-	key := cache.PuzzleKey(year, day, part, input)
+	key := cache.PuzzleKey{Year: year, Day: day, Part: part, Input: input}
 	if _, exists := cache.ContainsKey(key); !exists {
 		fmt.Printf("No record of running %d/day%d/part%d with %s\n", year, day, part, input)
 		return nil
