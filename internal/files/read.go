@@ -6,10 +6,11 @@ import (
 )
 
 const (
-	Runner = "runner.go"
-	Lock   = "lock"
-	Res    = "res"
-	Dur    = "dur"
+	Runner  = "runner.go"
+	Lock    = "lock"
+	Res     = "res"
+	Dur     = "dur"
+	Session = "session"
 )
 
 func ReadAll(files map[string]string) (map[string]string, error) {

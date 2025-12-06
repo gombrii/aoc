@@ -58,6 +58,10 @@ func (c *commands) ClearCache() error {
 	c.record.save()
 	return nil
 }
+func (c *commands) Login(session string) error {
+	c.record.save(session)
+	return nil
+}
 
 func TestSuccessful(t *testing.T) {
 	for name, params := range map[string]struct {
@@ -170,6 +174,11 @@ func TestSuccessful(t *testing.T) {
 			called: "ClearCache",
 			with:   []any{},
 		},
+		"Login": {
+			args:   "login -s abc123",
+			called: "Login",
+			with:   []any{"abc123"},
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			cmd := commands{record: record{}}
@@ -257,6 +266,12 @@ func TestError(t *testing.T) {
 		"GenAoc with input": {
 			args: "init -m mymodule -i test.txt",
 		},
+		"Login without session": {
+			args: "login -s",
+		},
+		"Login without session param": {
+			args: "login",
+		},
 		"year wrong format": {
 			args: "-y senap",
 		},
@@ -274,6 +289,9 @@ func TestError(t *testing.T) {
 		},
 		"module param without init": {
 			args: "-m mymodule",
+		},
+		"session param without login": {
+			args: "-s abc123",
 		},
 		"unknown command": {
 			args: "start",

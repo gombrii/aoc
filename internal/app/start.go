@@ -21,6 +21,7 @@ const (
 	opInitDay        = "init-d"
 	opCacheClear     = "cacheclear"
 	opCheck          = "check"
+	opLogin          = "login"
 )
 
 const usage = `Usage:
@@ -63,6 +64,7 @@ type Commands interface {
 	GenAoc(module string) error
 	Check() error
 	ClearCache() error
+	Login(session string) error
 }
 
 type input struct {
@@ -72,6 +74,7 @@ type input struct {
 	part   int
 	input  string
 	module string
+	sesion string
 }
 
 func Start(cmd Commands, args ...string) error {
@@ -114,6 +117,8 @@ func Start(cmd Commands, args ...string) error {
 		err = cmd.ClearCache()
 	case opCheck:
 		err = cmd.Check()
+	case opLogin:
+		err = cmd.Login(in.sesion)
 	}
 
 	if err != nil {
@@ -172,6 +177,11 @@ func parseInput(args []string) (input, error) {
 				return input{}, errors.New("module (-m) requires a value")
 			}
 			in.module = val
+		case "-s", "--session":
+			if val == "" {
+				return input{}, errors.New("session (-s) requires a value")
+			}
+			in.sesion = val
 		default:
 			if strings.HasPrefix(param, "-") {
 				return input{}, fmt.Errorf("unknown flag %q", param)
@@ -205,6 +215,9 @@ func validate(in input) error {
 		if in.module != "" {
 			return errors.New(`unknown flag "-m"`)
 		}
+		if in.sesion != "" {
+			return errors.New(`unknown flag "-s"`)
+		}
 	case opInitDay:
 		if in.day == 0 {
 			return errors.New("day (-d) is required")
@@ -218,9 +231,34 @@ func validate(in input) error {
 		if in.input != "" {
 			return errors.New(`unknown flag "-i"`)
 		}
+		if in.sesion != "" {
+			return errors.New(`unknown flag "-s"`)
+		}
 	case opInitModule:
 		if in.module == "" {
 			return errors.New("module name (-m) is required")
+		}
+		if in.year != 0 {
+			return errors.New(`unknown flag "-y"`)
+		}
+		if in.day != 0 {
+			return errors.New(`unknown flag "-d"`)
+		}
+		if in.part != 0 {
+			return errors.New(`unknown flag "-p"`)
+		}
+		if in.input != "" {
+			return errors.New(`unknown flag "-i"`)
+		}
+		if in.sesion != "" {
+			return errors.New(`unknown flag "-s"`)
+		}
+	case opLogin:
+		if in.sesion == "" {
+			return errors.New("sesion token (-s) is required")
+		}
+		if in.module != "" {
+			return errors.New(`unknown flag "-m"`)
 		}
 		if in.year != 0 {
 			return errors.New(`unknown flag "-y"`)
@@ -249,6 +287,9 @@ func validate(in input) error {
 		}
 		if in.module != "" {
 			return errors.New(`unknown flag "-m"`)
+		}
+		if in.sesion != "" {
+			return errors.New(`unknown flag "-s"`)
 		}
 	default:
 		return fmt.Errorf("invalid command %q", in.op)
