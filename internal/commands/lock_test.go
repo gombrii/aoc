@@ -15,7 +15,7 @@ func TestLock(t *testing.T) {
 
 	initCache(t, wd, testCache)
 
-	data, _ := os.ReadFile(filepath.Join(testCache, "2024-day1-part1-input", "lock"))
+	data, _ := os.ReadFile(filepath.Join(testCache, "puzzles", "2024-day1-part1-input", "lock"))
 	if strings.TrimSpace(string(data)) != "false" {
 		t.Error("lock didn't start as false")
 	}
@@ -24,7 +24,7 @@ func TestLock(t *testing.T) {
 		t.Errorf("calling Lock: %v", err)
 	}
 
-	data, _ = os.ReadFile(filepath.Join(testCache, "2024-day1-part1-input", "lock"))
+	data, _ = os.ReadFile(filepath.Join(testCache, "puzzles", "2024-day1-part1-input", "lock"))
 	if string(data) != "true" {
 		t.Error("locking didn't set lock to true")
 	}
@@ -33,7 +33,7 @@ func TestLock(t *testing.T) {
 		t.Errorf("calling Unlock: %v", err)
 	}
 
-	data, _ = os.ReadFile(filepath.Join(testCache, "2024-day1-part1-input", "lock"))
+	data, _ = os.ReadFile(filepath.Join(testCache, "puzzles", "2024-day1-part1-input", "lock"))
 	if string(data) != "false" {
 		t.Error("unlocking didn't set lock to false")
 	}
@@ -53,13 +53,13 @@ func TestCorruptFiles(t *testing.T) {
 	}{
 		"lock missing res": {
 			corrupt: func(testCache string) {
-				os.Remove(filepath.Join(testCache, "2024-day1-part1-input", "res"))
+				os.Remove(filepath.Join(testCache, "puzzles", "2024-day1-part1-input", "res"))
 			},
 			uut: (commands.Commands{}).Lock,
 		},
 		"status missing res": {
 			corrupt: func(testCache string) {
-				os.Remove(filepath.Join(testCache, "2024-day1-part1-input", "res"))
+				os.Remove(filepath.Join(testCache, "puzzles", "2024-day1-part1-input", "res"))
 			},
 			uut: (commands.Commands{}).Status,
 		},

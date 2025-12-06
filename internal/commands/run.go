@@ -107,7 +107,7 @@ func (c Commands) Run(year, day, part int, input string) error {
 }
 
 func getRunnerPath(year, day, part int, input string) (string, error) {
-	cacheKey := cache.Key(year, day, part, input)
+	cacheKey := cache.PuzzleKey(year, day, part, input)
 
 	if cPath, ok := cache.Contains(cacheKey, files.Runner); ok {
 		return cPath, nil

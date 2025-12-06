@@ -65,7 +65,7 @@ func initDay(t *testing.T, wd, testRoot string) {
 //	│   ├── dur
 //	│   └── runner.go
 func initCache(t *testing.T, wd, testCache string) {
-	if err := copy.Copy(filepath.Join(wd, "testdata", "cache", "2024-day1-part1-input"), filepath.Join(testCache, "2024-day1-part1-input")); err != nil {
+	if err := copy.Copy(filepath.Join(wd, "testdata", "cache", "puzzles", "2024-day1-part1-input"), filepath.Join(testCache, "puzzles", "2024-day1-part1-input")); err != nil {
 		t.Fatalf("could not init cache: %v", err)
 	}
 }

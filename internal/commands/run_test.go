@@ -15,7 +15,7 @@ func TestRun(t *testing.T) {
 	initMod(t, wd, testRoot)
 	initDay(t, wd, testRoot)
 
-	if _, err := os.Stat(filepath.Join(testCache, "2024-day1-part1-input")); err == nil {
+	if _, err := os.Stat(filepath.Join(testCache, "puzzles", "2024-day1-part1-input")); err == nil {
 		t.Error("Cache already exists")
 	}
 
@@ -23,7 +23,7 @@ func TestRun(t *testing.T) {
 		t.Errorf("calling Run: %v", err)
 	}
 
-	if _, err := os.Stat(filepath.Join(testCache, "2024-day1-part1-input")); err != nil {
+	if _, err := os.Stat(filepath.Join(testCache, "puzzles", "2024-day1-part1-input")); err != nil {
 		t.Error("Run wasn't cached")
 	}
 }
@@ -59,7 +59,7 @@ func TestRunError(t *testing.T) {
 				t.Errorf("calling Run: %v", err)
 			}
 
-			if _, err := os.Stat(filepath.Join(testCache, "2024-day1-part1-input")); err != nil {
+			if _, err := os.Stat(filepath.Join(testCache, "puzzles", "2024-day1-part1-input")); err != nil {
 				t.Error("Run wasn't cached")
 			}
 		})

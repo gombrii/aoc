@@ -30,7 +30,7 @@ func (c Commands) Check() error {
 	puzzles := make([]printable, 0)
 	i := 0
 
-	for _, l := range cache.All() {
+	for _, l := range cache.AllPuzzles() {
 		data, err := files.ReadAll(map[string]string{
 			files.Lock: filepath.Join(l, files.Lock),
 		})
