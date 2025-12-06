@@ -8,7 +8,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-func GetExampleInput(client *Client, year, day int, session string) (string, error) {
+func GetExampleInput(client *Client, year, day int) (string, error) {
 	resp, err := client.get(fmt.Sprintf("/%d/day/%d", year, day))
 	if err != nil {
 		return "", err

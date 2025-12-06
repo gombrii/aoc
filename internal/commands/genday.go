@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/gombrii/aoc/internal/com"
 	"github.com/gombrii/aoc/internal/files"
 )
 
@@ -32,13 +33,29 @@ func (c Commands) GenDay(year, day int) error {
 	yName := fmt.Sprintf("%d", year)
 	dName := fmt.Sprintf("day%d", day)
 
+	puzzleInput := ""
+	exampleInput := ""
+
+	if session, ok := LoggedIn(); ok {
+		data, err := com.GetPuzzleInput(com.NewClient(session), year, day)
+		if err != nil {
+			fmt.Println("Warning: failed to fetch puzzle input from server")
+		}
+		puzzleInput = data
+		data, err = com.GetExampleInput(com.NewClient(session), year, day)
+		if err != nil {
+			fmt.Println("Warning: failed to fetch puzzle input from server")
+		}
+		exampleInput = data
+	}
+
 	if err := files.Gen(
 		map[string]string{
 			filepath.Join(yName, "solutions", dName, "part1.go"):  part1Tmpl,
 			filepath.Join(yName, "solutions", dName, "part2.go"):  part2Tmpl,
 			filepath.Join(yName, "solutions", dName, "common.go"): commonTmpl,
-			filepath.Join(yName, "input", dName, "input.txt"):     "",
-			filepath.Join(yName, "input", dName, "test.txt"):      "",
+			filepath.Join(yName, "input", dName, "input.txt"):     puzzleInput,
+			filepath.Join(yName, "input", dName, "test.txt"):      exampleInput,
 		},
 		map[string]string{
 			"Year":    yName,

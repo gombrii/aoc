@@ -30,7 +30,21 @@ func (c Commands) Login(session string) error {
 		return fmt.Errorf("caching session token: %v", err)
 	}
 
-	fmt.Println("Logged in with user", username)
+	fmt.Println("Logged in as user", username)
 
 	return nil
+}
+
+func LoggedIn() (string, bool) {
+	path, ok := cache.Contains(cache.ConfigKey(User), files.Session)
+	if !ok {
+		return "", false
+	}
+
+	data, err := files.Read(path)
+	if err != nil {
+		return "", false
+	}
+
+	return string(data), true
 }

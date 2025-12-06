@@ -66,7 +66,7 @@ func TestGetExampleInput(t *testing.T) {
 				},
 			}
 
-			res, err := com.GetExampleInput(client, 0, 0, "")
+			res, err := com.GetExampleInput(client, 0, 0)
 			if err != nil {
 				t.Fatal(err)
 			}
