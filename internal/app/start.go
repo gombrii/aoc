@@ -11,17 +11,16 @@ import (
 )
 
 const (
-	opPuzzleRunShort = ""
-	opPuzzleRun      = "puzzlerun"
-	opPuzzleStatus   = "puzzlestatus"
-	opPuzzleLock     = "puzzlelock"
-	opPuzzleUnlock   = "puzzleunlock"
-	opInitModule     = "init-m"
-	opInitDay        = "init-d"
-	opCacheClear     = "cacheclear"
-	opCheck          = "check"
-	opLogin          = "login"
-	opSubmit         = "submit"
+	opRun        = ""
+	opStatus     = "status"
+	opLock       = "lock"
+	opUnlock     = "unlock"
+	opInitModule = "init-m"
+	opInitDay    = "init-d"
+	opCacheClear = "cacheclear"
+	opCheck      = "check"
+	opLogin      = "login"
+	opSubmit     = "submit"
 )
 
 const usage = `Usage:
@@ -111,13 +110,13 @@ func Start(cmd Commands, args ...string) error {
 	injectDefault(&in)
 
 	switch in.op {
-	case opPuzzleRun:
+	case opRun:
 		err = cmd.Run(in.year, in.day, in.part, in.input)
-	case opPuzzleStatus:
+	case opStatus:
 		err = cmd.Status(in.year, in.day, in.part, in.input)
-	case opPuzzleLock:
+	case opLock:
 		err = cmd.Lock(in.year, in.day, in.part, in.input)
-	case opPuzzleUnlock:
+	case opUnlock:
 		err = cmd.Unlock(in.year, in.day, in.part, in.input)
 	case opInitDay:
 		err = cmd.GenDay(in.year, in.day)
@@ -217,7 +216,7 @@ func parseInput(args []string) (input, error) {
 
 func validate(in input) error {
 	switch in.op {
-	case opPuzzleRunShort, opPuzzleRun, opPuzzleStatus, opPuzzleLock, opPuzzleUnlock:
+	case opRun, opStatus, opLock, opUnlock:
 		if in.day == 0 {
 			return errors.New("day (-d) is required")
 		}
@@ -334,7 +333,7 @@ func defaultInput() input {
 	}
 
 	return input{
-		op:    opPuzzleRun,
+		op:    opRun,
 		year:  year,
 		input: "input.txt",
 	}

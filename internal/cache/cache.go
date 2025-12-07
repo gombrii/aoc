@@ -92,7 +92,7 @@ func AllPuzzles() iter.Seq2[int, string] {
 	})
 	return func(yield func(int, string) bool) {
 		for i, e := range entries {
-			if !yield(i, filepath.Join(cache, e.Name())) {
+			if !yield(i, filepath.Join(cache, "puzzles", e.Name())) {
 				return
 			}
 		}

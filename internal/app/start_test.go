@@ -94,62 +94,62 @@ func TestSuccessful(t *testing.T) {
 			with:   []any{2023, 1, 1, "test.txt"},
 		},
 		"Status": {
-			args:   "puzzle status -d 1 -p 1",
+			args:   "status -d 1 -p 1",
 			called: "Status",
 			with:   []any{2025, 1, 1, "input.txt"},
 		},
 		"Status other year": {
-			args:   "puzzle status -d 1 -y 2023 -p 1",
+			args:   "status -d 1 -y 2023 -p 1",
 			called: "Status",
 			with:   []any{2023, 1, 1, "input.txt"},
 		},
 		"Status other input": {
-			args:   "puzzle status -d 1 -i test.txt -p 1",
+			args:   "status -d 1 -i test.txt -p 1",
 			called: "Status",
 			with:   []any{2025, 1, 1, "test.txt"},
 		},
 		"Status other year and input": {
-			args:   "puzzle status -d 1 -i test.txt -p 1 -y 2023",
+			args:   "status -d 1 -i test.txt -p 1 -y 2023",
 			called: "Status",
 			with:   []any{2023, 1, 1, "test.txt"},
 		},
 		"Lock": {
-			args:   "puzzle lock -d 1 -p 1",
+			args:   "lock -d 1 -p 1",
 			called: "Lock",
 			with:   []any{2025, 1, 1, "input.txt"},
 		},
 		"Lock other year": {
-			args:   "puzzle lock -d 1 -y 2023 -p 1",
+			args:   "lock -d 1 -y 2023 -p 1",
 			called: "Lock",
 			with:   []any{2023, 1, 1, "input.txt"},
 		},
 		"Lock other input": {
-			args:   "puzzle lock -d 1 -i test.txt -p 1",
+			args:   "lock -d 1 -i test.txt -p 1",
 			called: "Lock",
 			with:   []any{2025, 1, 1, "test.txt"},
 		},
 		"Lock other year and input": {
-			args:   "puzzle lock -d 1 -i test.txt -p 1 -y 2023",
+			args:   "lock -d 1 -i test.txt -p 1 -y 2023",
 			called: "Lock",
 			with:   []any{2023, 1, 1, "test.txt"},
 		},
 		"Unlock": {
-			args:   "puzzle unlock -d 1 -p 1",
+			args:   "unlock -d 1 -p 1",
 			called: "Unlock",
 			with:   []any{2025, 1, 1, "input.txt"},
 		},
 		"Unlock other year": {
-			args:   "puzzle unlock -d 1 -y 2023 -p 1",
+			args:   "unlock -d 1 -y 2023 -p 1",
 			called: "Unlock",
 			with:   []any{2023, 1, 1, "input.txt"},
 		},
 		"Unlock other input": {
-			args:   "puzzle unlock -d 1 -i test.txt -p 1",
+			args:   "unlock -d 1 -i test.txt -p 1",
 			called: "Unlock",
 			with:   []any{2025, 1, 1, "test.txt"},
 		},
 		"Unlock other year and input": {
-			args:   "puzzle unlock -d 1 -i test.txt -p 1 -y 2023",
+			args:   "unlock -d 1 -i test.txt -p 1 -y 2023",
 			called: "Unlock",
 			with:   []any{2023, 1, 1, "test.txt"},
 		},
@@ -222,31 +222,31 @@ func TestError(t *testing.T) {
 			args: "-d 1 -p 1 -m mymodule",
 		},
 		"Status missing part": {
-			args: "puzzle status -d 1",
+			args: "status -d 1",
 		},
 		"Status missing day": {
-			args: "puzzle status -p 1",
+			args: "status -p 1",
 		},
 		"Status with module": {
-			args: "puzzle status -d 1 -p 1 -m mymodule",
+			args: "status -d 1 -p 1 -m mymodule",
 		},
 		"Lock missing part": {
-			args: "puzzle lock -d 1",
+			args: "lock -d 1",
 		},
 		"Lock missing day": {
-			args: "puzzle lock -p 1",
+			args: "lock -p 1",
 		},
 		"Lock with module": {
-			args: "puzzle lock -d 1 -p 1 -m mymodule",
+			args: "lock -d 1 -p 1 -m mymodule",
 		},
 		"Unlock missing part": {
-			args: "puzzle unlock -d 1",
+			args: "unlock -d 1",
 		},
 		"Unlock missing day": {
-			args: "puzzle unlock -p 1",
+			args: "unlock -p 1",
 		},
 		"Unlock with module": {
-			args: "puzzle unlock -d 1 -p 1 -m mymodule",
+			args: "unlock -d 1 -p 1 -m mymodule",
 		},
 		"GenDay missing day": {
 			args: "init",
