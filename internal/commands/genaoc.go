@@ -14,12 +14,17 @@ package exit
 import (
 	"fmt"
 	"os"
+	"runtime"
 )
 
 // If prints err and exits if err != nil.
 func If(err error) {
 	if err != nil {
-		fmt.Printf("Error: %v", err)
+		if _, _, line, ok := runtime.Caller(1); ok {
+			fmt.Printf("Error:%d: %v", line, err)
+		} else {
+			fmt.Printf("Error: %v", err)
+		}
 		os.Exit(1)
 	}
 }
@@ -32,7 +37,7 @@ func PanicIf(err error) {
 }
 `
 
-const parseTmpl = `// Package input does, in the spirit of Advent of Code, provide some common ways to interpret the 
+const parseTmpl = `// Package input does, in the spirit of Advent of Code, provide some common ways to interpret the
 // puzzles' input data.
 package parse
 
@@ -40,30 +45,29 @@ import (
 	"strings"
 )
 
+// String returns data as a continuous string.
+func String(data []byte) string {
+	return strings.TrimSpace(string(data))
+}
+
 // Lines returns data as a slice of strings corresponding to the lines of text in the input data.
 func Lines(data []byte) []string {
 	return strings.Split(strings.TrimSpace(string(data)), "\n")
 }
 
 // Parts returns data as a slice of strings corresponding to the parts of text in the input data
-// separated by the given separator.
-func Parts(data []byte, separator string) []string {
-	return strings.Split(strings.TrimSpace(string(data)), separator)
+// separated by the given delimiter.
+func Parts(data []byte, delimiter string) []string {
+	return strings.Split(strings.TrimSpace(string(data)), delimiter)
 }
 
-// String returns data as a continuous string.
-func String(data []byte) string {
-	return strings.TrimSpace(string(data))
-}
-
-// Matrix returns data as a matrix. The delimiter divides the data into separates columns while rows
-// correspond to the lines of text in the input data.
-func Matrix(data []byte, delimiter string) [][]string {
+// Matrix returns data as a matrix. Rows correspond to the lines of text in the input data.
+func Matrix(data []byte) [][]string {
 	lines := strings.Split(strings.TrimSpace(string(data)), "\n")
 	matrix := make([][]string, len(lines))
 
 	for i, line := range lines {
-		matrix[i] = strings.Split(line, delimiter)
+		matrix[i] = strings.Split(line, "")
 	}
 
 	return matrix
@@ -78,72 +82,9 @@ import (
 	"strings"
 )
 
-type G struct {
-	Symbol rune
-	X      int
-	Y      int
-}
-
-// GString returns a string representation of a grid of width w and height h. It can be printed to
-// present a visual illustration of a two dimensional space.
-//
-// Glyphs is a slice containing information about symbols and their locations on the grid. Bg
-// dictates the "background" for empty coordinates. Any coordinate is omitted that is in glyphs but
-// outside the bounds of the grid. Glyph slice renders top to bottom, so for any two glyphs
-// occupying the the same cell, the earlier one will be overwritten by the latter.
-//
-//	grid := render.GString(width, height, '.', []render.G{
-//		render.G{Symbol: '^', X: 8, Y: 6},
-//		render.G{Symbol: '#', X: 8, Y: 9},
-//		render.G{Symbol: '#', X: 5, Y: 1},
-//		render.G{Symbol: '#', X: 7, Y: 0},
-//		render.G{Symbol: '#', X: 2, Y: 4},
-//	})
-//
-// The GString above gives the following result when printed.
-//
-//	.......#..
-//	.....#....
-//	..........
-//	..........
-//	..#.......
-//	..........
-//	........^.
-//	..........
-//	..........
-//	........#.
-//
-// Use render.MString instead to get a string representation of an actual matrix ([][]T).
-func GString(w, h int, bg rune, glyphs []G) string {
-	lines := make([][]rune, h)
-	for y := range h {
-		lines[y] = make([]rune, w)
-		for x := range w {
-			lines[y][x] = bg
-		}
-	}
-	for _, g := range glyphs {
-		if g.X < 0 || g.X >= w || g.Y < 0 || g.Y >= h {
-			continue
-		}
-		lines[g.Y][g.X] = g.Symbol
-	}
-
-	var b strings.Builder
-	b.Grow(h*w + (h - 1))
-	for i, l := range lines {
-		b.WriteString(string(l))
-		if i < len(lines)-1 {
-			b.WriteByte('\n')
-		}
-	}
-
-	return b.String()
-}
-
-// MString returns a string representation of the given matrix. It can be printed
+// Matrix returns a string representation of the given matrix. It can be printed
 // to present a visual illustration of the two dimensional space.
-func MString[T any](matrix [][]T) string {
+func Matrix[T any](matrix [][]T) string {
 	var b strings.Builder
 	for y := range matrix {
 		for x := range matrix[0] {
@@ -154,6 +95,20 @@ func MString[T any](matrix [][]T) string {
 		}
 	}
 	return b.String()
+}
+
+// MapSlice returns the string representation of a slice while allowing an operation to be performed
+// on each element of it.
+//
+// It is handy if you have a slice of structs and want to print a certain property of each item.
+// The func extracts the property that's printed.
+func MapSlice[T comparable](s []T, f func(T) any) string {
+	var b strings.Builder
+	b.WriteString("[")
+	for _, v := range s {
+		b.WriteString(fmt.Sprintf("%v ", f(v)))
+	}
+	return b.String()[:b.Len()-1] + "]"
 }
 `
 

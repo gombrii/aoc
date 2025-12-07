@@ -64,7 +64,7 @@ func (c Commands) Submit() error {
 	}
 
 	fmt.Println("Correct answer! \033[38;2;255;255;103m*\033[0m")
-	fmt.Println("This answer is now locked in. If future runs produce a different result, the run will error.")
+	fmt.Println("This answer is now locked in. Future runs will error if they produce a different result.")
 	fmt.Println("To verify all locked puzzle results, run 'aoc check'.")
 
 	return nil
