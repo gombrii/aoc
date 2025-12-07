@@ -26,7 +26,7 @@ const (
 
 const usage = `Usage:
   aoc -d DAY -p {1|2} [-y YEAR def: {{year}}] [-i INPUT def: input.txt]
-  aoc init   {-d DAY [-y YEAR def: {{year}}] | -m MODULENAME}
+  aoc init {-d DAY [-y YEAR def: {{year}}] | -m MODULENAME}
   aoc submit 
   aoc login -s SESSION 
   aoc check 

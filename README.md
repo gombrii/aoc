@@ -5,20 +5,20 @@
 
 # Advent of Code CLI (`aoc`)
 
-A command-line tool to streamline your **Advent of Code** workflow in **Go**, from scaffolding new solutions to running them with input data, chasing better solutions and execution times.  
+A command-line tool to streamline your **Advent of Code** workflow in **Go**, from scaffolding, running and submitting solutions, to testing and refactoring, chasing better solutions and execution times.  
 It handles project setup, day initialization, and execution of specific parts with minimal friction. 
 
 The goal of this app is at its core to simply create a helpful catalogue structure for Advent of Code repos with a method to easily run the solutions without having to juggle multiple binaries. None of the advanced features are needed, but they're there for those who benefit from them.
 
 ## Features
 
-- **Run** any day and part directly from the CLI
+- **Run** any puzzle (part 1 and 2) of any day and year directly from the CLI
 - **Initialize** a new AoC module with shared helpers (`parse`, `exit`, etc.)
-- **Scaffold** new solution files for specific days automatically
+- **Scaffold** new solution files for a given day automatically, with funcs _Part1_ and _Part2_ for you to implement
 - **Auto-detects the current Advent of Code year**, defaulting to the year of the most recently started Advent of Code
-- **Generate** minimal boilerplate code to get started quickly
-- **Lock in** correct answers and use aoc as a test tool to find better puzzle solutions.
-- **Chase fast execution times** with execution duration memory
+- **Login** to your AoC account from CLI to pull puzzle inputs straight from server and submit solutions
+- **Lock in** correct answers and use aoc as a test tool to polish your puzzle solutions.
+- **Chase execution times** with cached runs
 
 ## Getting started
 
@@ -61,37 +61,39 @@ myaocproject/
 ```
 ## Usage
 ```
-aoc [puzzle run] <params>
-aoc puzzle {run|status|lock|unlock} -d DAY -p {1|2} [-y YEAR default: Curr AoC year] [-i INPUT default: input.txt]
-aoc init   {-d DAY [-y YEAR default: Curr AoC year] | -m MODULENAME}
+aoc -d DAY -p {1|2} [-y YEAR] [-i INPUT]
+aoc init {-d DAY [-y YEAR] | -m MODULENAME}
+aoc submit 
+aoc login -s SESSION 
 aoc check 
 aoc cache clear
-aoc help [command]
+aoc help [-v]
+aoc version
 
-Puzzle commands:
-  run          Execute a puzzle (default when no subcommand is given)
-  status       Show result and duration of last run of puzzle
-  lock         Lock result; future runs error if they deviate; keep fastest duration
-  unlock       Unlock result; remember only last run
+Run and submit:
+  aoc              Run a puzzle solution
+  submit           Submit the result of your last run puzzle (requires login)
 
 Project setup:
-  init --day       Scaffold solution files for a day
+  init --day       Scaffold solution files for a new day (pull puzzle input from server if logged in)
   init --module    Create a new AoC module structure
 
 Misc:
+  login            Enables pulling of puzzle input and submission of solutions to server
   check            Run all locked puzzles to verify results
-  cache clear      Clear cached runners and metadata
-  help             Show this or command-specific help
+  cache clear      Delete all data created and kept by aoc
+  help             Show this help
+  version          Show installed aoc version
 ```
 
 ## How it works
-- Each day’s solution lives under `YEAR/solutions/dayX/`.
-- Each day’s puzzle input lives under `YEAR/input/dayX/`.
+- Each day's solution lives under `YEAR/solutions/dayX/`.
+- Each day's puzzle input lives under `YEAR/input/dayX/`.
 - Each part (Part1, Part2) is implemented as a Go function taking a []byte (puzzle input).
 - The aoc init command:
-    - If provided a mod name, eg. `-m mymodule`, creates a mod file with your system's currently installed Go version as well as a couple of utility packages under `shared/` (can be removed if not needed).
-    - If provided a day, eg. `-d 1`, creates the scaffolding for a new day's solutions and input for the given year. If no year, eg. `-y 2023`, is provided the default is the year during which the last Advent of Code started. This means that the default year the majority of time is the previous year. On Dec 1 00:00 UTC-5 when the current year's AoC is released the default year flips over to the current year.
-- The aoc puzzle run command (default):
+    - If provided a mod name, eg. `-m mymodule`, creates a mod file with your system's currently installed Go version as well as a couple of utility packages under `shared/` (not mandatory).
+    - If provided a day, eg. `-d 1`, creates the scaffolding for a new day's solutions and input for the given year. If no year, eg. `-y 2023`, is provided the default is the year during which the last Advent of Code started. This means that the default year the majority of time is the previous year. On Dec 1 00:00 UTC-5 when the current year's AoC is released the default year flips over to the current year. If logged in as a user, this also pulls puzzle inputs from the server.
+- The aoc run command (implicit):
     1. Invokes the corresponding function.
     1. Prints the result and execution duration.
     1. Stores result and execution duration in cache.
@@ -107,7 +109,7 @@ func Part1(data []byte) any {
 }
 ```
 
-This is where you write your puzzle solution. The puzzle input is provided as raw bytes (that can be parsed using `shared/parse`). To simplify life, the puzzle solution can be returned as is, without needing any type conversion, after which it's printed to the command line. Every initiated day's solution catalogue, apart from `part1.go` and `part2.go`, also gets a `common.go` file, which is simply a convenient place to store code that might be useful for both parts of the challenge.
+This is where you write your puzzle solution. The puzzle input is provided as raw bytes (that can be parsed using `shared/parse`). To simplify life, the puzzle solution can be returned as is, without needing any type conversion, after which it's printed to the command line. Every initiated day's solution catalogue, apart from `part1.go` and `part2.go`, also gets a `common.go` file, which is simply a convenient place to store code that might be useful for both parts of the puzzle.
 
 How running a puzzle looks:
 ```shell
@@ -117,21 +119,16 @@ Res: 2970687
 Dur: 304µs
 ```
 
-`Res` is whatever was returned from the PartX function and `Dur` is the time measured from the moment the PartX function was called to the moment after it returned. The loading of the puzzle input file data happens before time starts recording. Printing (for debug purposes or otherwise) will not interfere with anything, so feel free to do so. Prints will simply appear between "Running year/dayX/partX with X.txt" and the `Res` and `Dur` statements.
+`Res` is whatever was returned from the PartX function and `Dur` is the time measured from the moment the PartX function was called to the moment after it returned. The loading of the puzzle input file data happens before time starts recording. Prints in the puzzle solution (for debug purposes or otherwise) will not interfere with anything, so feel free to use them. Print outputs will simply appear between "Running year/dayX/partX with X.txt" and the `Res` and `Dur` statements.
 
-Every initiated day's input catalogue gets two empty text files (`input.txt`, `test.txt`) into which you paste that day's puzzle input. Run with `-i` to run the puzzle with a specific input file, eg. `aoc -d 1 -p 2 -i test.txt`. The default is `input.txt`. If the puzzle presents more than one test input, simply create more test input files.
+Every initiated day's input catalogue gets two text files (`input.txt`, `test.txt`). If you are logged in as a user these are pre-filled with the puzzle and example data from the server. Otherwise they are empty for you to paste into. Run a puzzle with `-i` to select a specific input file, eg. `aoc -d 1 -p 2 -i test.txt`. The default is `input.txt`. If the puzzle presents more than one example input, simply create more input files.
 
-### Locking
-Aoc remembers the results and durations of each solution's last run. Locking a solution does two things. Firstly, it locks in the result for that solution so that it's not overwritten and instead errors if the solution's result deviates from the locked in result. Secondly, it sees to that the duration for the solution only updates if it's shorter than the shortest recorded duration, and of course was coupled with a correct result.
+### Login
+You can login by running `aoc login` and providing your personal AoC session token. It can be found in your web browser's dev tools when logged in to your Advent of Code account. Logging into the aoc CLI lets you interact with the server. When logged in puzzle input and example input are automatically pulled from the server when you initialize a new day.
 
-```shell
-$ aoc puzzle lock -d 1 -p 1
-▣ Locked
-Lock res: 2970687
-Best dur: 304µs
-```
+Being logged in also enables you to submit your puzzle solutions right from the terminal by running `aoc submit`. This submits the previously run puzzle result and outputs the result. Submitting a correct result will also trigger aoc to lock down the result so that future runs of the solution will error if the result differs from the correct one. Moreover, duration will also be continuously updated compared to your fastest execution time for that puzzle since it got locked.
 
-The typical use case for locking a solution is after a correct result has been achieved. Often the first solution is sloppy or naïve. When the solution is locked it gives you the opportunity to experiment and polish your solution and compare results, while getting clear feedback when something has gone wrong. Effectively you've turned your puzzle solution into a simple unit- and performance test testing itself. 
+This gives you the opportunity to refactor and polish your solution while getting clear feedback on improved performance and if something alters the result. Effectively your puzzle solution turns into a simple unit- and performance test testing itself. 
 
 ### Checking
 The `check` command will run all locked puzzles at once and verify their results. Only puzzles which produce correct results get a golden star (*).
@@ -166,13 +163,11 @@ shared/
 ```
 
 ### Cache
-Aoc uses the OS's default caching location to store data. When aoc runs a puzzle it generates a binary under the hood which is stored in cache for performance reasons. That's why consecutive runs of the same puzzle tend to get quicker. The cache also stores results and execution times for each puzzle and keeps track of which puzzles are locked. Clearing the cache removes every trace of it from your computer and resets aoc's memory. 
+Aoc uses the OS's default caching location to store data. When aoc runs a puzzle it generates a binary under the hood which is stored in cache for performance reasons. That's why the first couple of runs of a puzzle tend to be slower. The cache also stores results and execution times for each puzzle and keeps track of which puzzles are locked. Configuration data such as your session token is also stored here. Clearing the cache removes every trace of it from your computer and resets aoc's memory. 
 
 ## Author's notes
 ### Feature additions
-- The application is done and fully featured.
+- Most planned changes are related to code hygiene, among which are:
+  - Refactoring the layout of the app's internals to enable better testing and simpler flows
+  - Switching over to the stdlib flag package for user input
 - _Any feedback_ is welcome, both in terms of bugs or opinions on features or utilities.
-- I might add a couple of utilities in the shared library:
-  - for parsing input
-  - for rendering
-  - iterators
