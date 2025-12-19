@@ -21,9 +21,9 @@ import (
 func If(err error) {
 	if err != nil {
 		if _, _, line, ok := runtime.Caller(1); ok {
-			fmt.Printf("Error:%d: %v", line, err)
+			fmt.Printf("Error:%d: %v\n", line, err)
 		} else {
-			fmt.Printf("Error: %v", err)
+			fmt.Printf("Error: %v\n", err)
 		}
 		os.Exit(1)
 	}

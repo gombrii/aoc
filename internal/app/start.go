@@ -1,26 +1,26 @@
 package app
 
 import (
-	"errors"
+	"flag"
 	"fmt"
-	"iter"
+	"os"
 	"runtime/debug"
-	"strconv"
 	"strings"
 	"time"
 )
 
 const (
-	opRun        = ""
-	opStatus     = "status"
-	opLock       = "lock"
-	opUnlock     = "unlock"
-	opInitModule = "init-m"
-	opInitDay    = "init-d"
-	opCacheClear = "cacheclear"
-	opCheck      = "check"
-	opLogin      = "login"
-	opSubmit     = "submit"
+	opStatus  = "status"
+	opLock    = "lock"
+	opUnlock  = "unlock"
+	opInit    = "init"
+	opCache   = "cache"
+	opClear   = "clear"
+	opCheck   = "check"
+	opLogin   = "login"
+	opSubmit  = "submit"
+	opVersion = "version"
+	opHelp    = "help"
 )
 
 const usage = `Usage:
@@ -46,10 +46,9 @@ Misc:
   check            Run all locked puzzles to verify results
   cache clear      Delete all data created and kept by aoc
   help             Show this help
-  version          Show installed aoc version
-`
+  version          Show installed aoc version`
 
-const usageAppentix = `
+const usageAppendix = `
 Legacy commands:
   aoc {status|lock|unlock} -d DAY -p {1|2} [-y YEAR current default: {{year}}] [-i INPUT default: input.txt]
 
@@ -57,8 +56,7 @@ Legacy commands:
                (this is also shown after running the puzzle)
   lock         Lock result -> future runs error if result differ, remembers fastest duration
                (sumitting correct result with 'aoc submit' locks the result automatically)
-  unlock       Unlock result -> remember only last run
-`
+  unlock       Unlock result -> remember only last run`
 
 type Commands interface {
 	Run(year, day, part int, input string) error
@@ -73,290 +71,319 @@ type Commands interface {
 	Submit() error
 }
 
-type input struct {
-	op     string
-	year   int
-	day    int
-	part   int
-	input  string
-	module string
-	sesion string
-}
-
 func Start(cmd Commands, args ...string) error {
-	switch {
-	case len(args) == 2 && args[0] == "help" && args[1] == "-v":
-		defYear := fmt.Sprint(defaultInput().year)
-		fmt.Println(strings.ReplaceAll(usage, "{{year}}", defYear))
-		fmt.Println(strings.ReplaceAll(usageAppentix, "{{year}}", defYear))
-		return nil
-	case len(args) == 0 || args[0] == "help":
-		fmt.Println(strings.ReplaceAll(usage, "{{year}}", fmt.Sprint(defaultInput().year)))
-		return nil
-	case args[0] == "version":
-		fmt.Println("aoc", version())
+	if len(args) == 0 {
+		help()
 		return nil
 	}
 
-	in, err := parseInput(args)
-	if err != nil {
-		return err
+	// Run
+	if strings.Contains(args[0], "-") {
+		return run(args...)
 	}
 
-	if err := validate(in); err != nil {
-		return err
-	}
-
-	injectDefault(&in)
-
-	switch in.op {
-	case opRun:
-		err = cmd.Run(in.year, in.day, in.part, in.input)
+	switch args[0] {
 	case opStatus:
-		err = cmd.Status(in.year, in.day, in.part, in.input)
+		return status(args[1:]...)
 	case opLock:
-		err = cmd.Lock(in.year, in.day, in.part, in.input)
+		return lock(args[1:]...)
 	case opUnlock:
-		err = cmd.Unlock(in.year, in.day, in.part, in.input)
-	case opInitDay:
-		err = cmd.GenDay(in.year, in.day)
-	case opInitModule:
-		err = cmd.GenAoc(in.module)
-	case opCacheClear:
-		err = cmd.ClearCache()
-	case opCheck:
-		err = cmd.Check()
+		return unlock(args[1:]...)
+	case opInit:
+		return initialize(args[1:]...)
 	case opLogin:
-		err = cmd.Login(in.sesion)
+		return login(args[1:]...)
+	case opHelp:
+		return help(args[1:]...)
+	case opVersion:
+		return version(args[1:]...)
 	case opSubmit:
-		err = cmd.Submit()
+		return submit(args[1:]...)
+	case opCheck:
+		return check(args[1:]...)
+	case opCache:
+		if len(args) < 2 {
+			return fmt.Errorf("1unknown command: %s", args[0])
+		}
+		if args[1] != opClear {
+			return fmt.Errorf("2unknown command: %s", args[1])
+		}
+		return cacheClear(args[2:]...)
+	default:
+		return fmt.Errorf("3unknown command: %s", args[0])
 	}
+}
 
+func run(args ...string) error {
+	fs := flag.NewFlagSet("run", flag.ExitOnError)
+
+	var year int
+	var day int
+	var part int
+	var input string
+
+	fs.IntVar(&year, "y", defaultYear(), "year of the puzzle to run")
+	fs.IntVar(&day, "d", 0, "day of the puzzle")
+	fs.IntVar(&part, "p", 0, "which part of the puzzle to run")
+	fs.StringVar(&input, "i", "input.txt", "input file to feed the puzzle")
+
+	err := fs.Parse(args)
 	if err != nil {
 		return err
 	}
 
+	validateRequired(fs, "y", year)
+	validateRequired(fs, "d", day)
+	validateRequired(fs, "p", part)
+	validateRequired(fs, "i", input)
+
+	fmt.Println("Run", year, day, part, input) // TODO: Swap for function call
 	return nil
 }
+func initialize(args ...string) error {
+	fs := flag.NewFlagSet("init", flag.ExitOnError)
 
-func parseInput(args []string) (input, error) {
-	in := input{}
+	var year int
+	var day int
+	var module string
 
-	i := 0
-	// Parse subcommands
-	for j, arg := range args {
-		i = j
-		if strings.HasPrefix(arg, "-") {
-			break
-		}
+	fs.IntVar(&year, "y", defaultYear(), "year of the puzzle to scaffold. Cannot be used in combination with -m")
+	fs.IntVar(&day, "d", 0, "scaffold a puzzle for this day. Cannot be used in combination with -m")
+	fs.StringVar(&module, "m", "", "create module with this name. Cannot be used in combination with -d and -y")
 
-		in.op += arg
-
-		if i+1 == len(args) {
-			return in, nil
-		}
+	err := fs.Parse(args)
+	if err != nil {
+		return err
 	}
 
-	// Parse flags
-	for param, val := range paramVals(args[i:]) {
-		switch param {
-		case "-y", "--year":
-			numVal, err := strconv.Atoi(val)
-			if err != nil {
-				return input{}, fmt.Errorf("year (-y) %q must be a number", val)
-			}
-			in.year = numVal
-		case "-d", "--day":
-			numVal, err := strconv.Atoi(val)
-			if err != nil {
-				return input{}, fmt.Errorf("day (-d) %q must be a number", val)
-			}
-			in.day = numVal
-		case "-p", "--part":
-			numVal, err := strconv.Atoi(val)
-			if err != nil {
-				return input{}, fmt.Errorf("part (-p) %q must be a number {1|2}", val)
-			}
-			in.part = numVal
-		case "-i", "--input":
-			if val == "" {
-				return input{}, errors.New("input (-i) requires a value")
-			}
-			in.input = val
-		case "-m", "--module":
-			if val == "" {
-				return input{}, errors.New("module (-m) requires a value")
-			}
-			in.module = val
-		case "-s", "--session":
-			if val == "" {
-				return input{}, errors.New("session (-s) requires a value")
-			}
-			in.sesion = val
-		default:
-			if strings.HasPrefix(param, "-") {
-				return input{}, fmt.Errorf("unknown flag %q", param)
-			}
-			return input{}, fmt.Errorf("stray argument %q", param)
-		}
-	}
+	validateMutEx(fs, "d", "m", day, module)
 
-	if in.op == "init" {
-		if in.module != "" {
-			in.op += "-m"
-		} else if in.day != 0 {
-			in.op += "-d"
-		} else {
-			return input{}, errors.New("ambiguous call to init, no -d or -m arguments passed")
-		}
-	}
-
-	return in, nil
+	fmt.Println("Init", year, day, module) // TODO: Swap for function call
+	return nil
 }
+func login(args ...string) error {
+	fs := flag.NewFlagSet("login", flag.ExitOnError)
 
-func validate(in input) error {
-	switch in.op {
-	case opRun, opStatus, opLock, opUnlock:
-		if in.day == 0 {
-			return errors.New("day (-d) is required")
-		}
-		if in.part > 2 || in.part < 1 {
-			return errors.New("part (-p) not set to valid value {1|2}")
-		}
-		if in.module != "" {
-			return errors.New(`unknown flag "-m"`)
-		}
-		if in.sesion != "" {
-			return errors.New(`unknown flag "-s"`)
-		}
-	case opInitDay:
-		if in.day == 0 {
-			return errors.New("day (-d) is required")
-		}
-		if in.part != 0 {
-			return errors.New(`unknown flag "-p"`)
-		}
-		if in.module != "" {
-			return errors.New(`unknown flag "-m"`)
-		}
-		if in.input != "" {
-			return errors.New(`unknown flag "-i"`)
-		}
-		if in.sesion != "" {
-			return errors.New(`unknown flag "-s"`)
-		}
-	case opInitModule:
-		if in.module == "" {
-			return errors.New("module name (-m) is required")
-		}
-		if in.year != 0 {
-			return errors.New(`unknown flag "-y"`)
-		}
-		if in.day != 0 {
-			return errors.New(`unknown flag "-d"`)
-		}
-		if in.part != 0 {
-			return errors.New(`unknown flag "-p"`)
-		}
-		if in.input != "" {
-			return errors.New(`unknown flag "-i"`)
-		}
-		if in.sesion != "" {
-			return errors.New(`unknown flag "-s"`)
-		}
-	case opLogin:
-		if in.sesion == "" {
-			return errors.New("session token (-s) is required")
-		}
-		if in.module != "" {
-			return errors.New(`unknown flag "-m"`)
-		}
-		if in.year != 0 {
-			return errors.New(`unknown flag "-y"`)
-		}
-		if in.day != 0 {
-			return errors.New(`unknown flag "-d"`)
-		}
-		if in.part != 0 {
-			return errors.New(`unknown flag "-p"`)
-		}
-		if in.input != "" {
-			return errors.New(`unknown flag "-i"`)
-		}
-	case opCacheClear, opCheck, opSubmit:
-		if in.year != 0 {
-			return errors.New(`unknown flag "-y"`)
-		}
-		if in.day != 0 {
-			return errors.New(`unknown flag "-d"`)
-		}
-		if in.part != 0 {
-			return errors.New(`unknown flag "-p"`)
-		}
-		if in.input != "" {
-			return errors.New(`unknown flag "-i"`)
-		}
-		if in.module != "" {
-			return errors.New(`unknown flag "-m"`)
-		}
-		if in.sesion != "" {
-			return errors.New(`unknown flag "-s"`)
-		}
-	default:
-		return fmt.Errorf("invalid command %q", in.op)
+	var session string
+
+	fs.StringVar(&session, "s", "", "your AoC account session token")
+
+	err := fs.Parse(args)
+	if err != nil {
+		return err
 	}
+
+	validateRequired(fs, "s", session)
+
+	fmt.Println("Login", session) // TODO: Swap for function call
+	return nil
+}
+func cacheClear(args ...string) error {
+	fs := flag.NewFlagSet("cache clear", flag.ExitOnError)
+	fs.Usage = func() {
+		fmt.Println("Usage of cache clear:")
+		fmt.Println("Clear aoc cache including all puzzle results, durations and login token")
+	}
+
+	err := fs.Parse(args)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Cache Clear") // TODO: Swap for function call
+	return nil
+}
+func check(args ...string) error {
+	fs := flag.NewFlagSet("check", flag.ExitOnError)
+	fs.Usage = func() {
+		fmt.Println("Usage of check:")
+		fmt.Println("Run and verify correct results from all locked solutions")
+	}
+
+	err := fs.Parse(args)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Check") // TODO: Swap for function call
+	return nil
+}
+func submit(args ...string) error {
+	fs := flag.NewFlagSet("submit", flag.ExitOnError)
+	fs.Usage = func() {
+		fmt.Println("Usage of submit:")
+		fmt.Println("Submit last run result. Requires login.")
+	}
+
+	err := fs.Parse(args)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Submit") // TODO: Swap for function call
+	return nil
+}
+func help(args ...string) error {
+	fs := flag.NewFlagSet("help", flag.ExitOnError)
+
+	var verbose bool
+
+	fs.BoolVar(&verbose, "v", false, "show extended usage")
+
+	err := fs.Parse(args)
+	if err != nil {
+		return err
+	}
+
+	text := usage
+	if verbose {
+		text += usageAppendix
+	}
+
+	fmt.Println(strings.ReplaceAll(text, "{{year}}", fmt.Sprint(defaultYear())))
+
+	return nil
+}
+func version(args ...string) error {
+	fs := flag.NewFlagSet("version", flag.ExitOnError)
+	fs.Usage = func() {
+		fmt.Println("Usage of version:")
+		fmt.Println("Print version information")
+	}
+
+	err := fs.Parse(args)
+	if err != nil {
+		return err
+	}
+
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		fmt.Println("unknown")
+	}
+	fmt.Println(info.Main.Version) // TODO: Swap for function call
 
 	return nil
 }
 
-func injectDefault(in *input) {
-	def := defaultInput()
-	if in.year == 0 {
-		in.year = def.year
+// Legacy
+func status(args ...string) error {
+	fs := flag.NewFlagSet("status", flag.ExitOnError)
+
+	var year int
+	var day int
+	var part int
+	var input string
+
+	fs.IntVar(&year, "y", defaultYear(), "year of the puzzle")
+	fs.IntVar(&day, "d", 0, "day of the puzzle")
+	fs.IntVar(&part, "p", 0, "part for which to check")
+	// input file implied as input.txt
+	//TODO: Make input.txt mandatory and implied instead of default
+
+	err := fs.Parse(args)
+	if err != nil {
+		return err
 	}
-	if in.op == "" {
-		in.op = def.op
+
+	validateRequired(fs, "y", year)
+	validateRequired(fs, "d", day)
+	validateRequired(fs, "p", part)
+	validateRequired(fs, "i", input)
+
+	fmt.Println("Status", year, day, part, input) // TODO: Swap for function call
+	return nil
+}
+func lock(args ...string) error {
+	fs := flag.NewFlagSet("status", flag.ExitOnError)
+
+	var year int
+	var day int
+	var part int
+	var input string
+
+	fs.IntVar(&year, "y", defaultYear(), "year of the puzzle")
+	fs.IntVar(&day, "d", 0, "day of the puzzle")
+	fs.IntVar(&part, "p", 0, "part for which to check")
+	// input file implied as input.txt
+	//TODO: Make input.txt mandatory and implied instead of default
+
+	err := fs.Parse(args)
+	if err != nil {
+		return err
 	}
-	if in.input == "" {
-		in.input = def.input
+
+	validateRequired(fs, "y", year)
+	validateRequired(fs, "d", day)
+	validateRequired(fs, "p", part)
+	validateRequired(fs, "i", input)
+
+	fmt.Println("Lock", year, day, part, input) // TODO: Swap for function call
+	return nil
+}
+func unlock(args ...string) error {
+	fs := flag.NewFlagSet("status", flag.ExitOnError)
+
+	var year int
+	var day int
+	var part int
+	var input string
+
+	fs.IntVar(&year, "y", defaultYear(), "year of the puzzle")
+	fs.IntVar(&day, "d", 0, "day of the puzzle")
+	fs.IntVar(&part, "p", 0, "part for which to check")
+	// input file implied as input.txt
+	//TODO: Make input.txt mandatory and implied instead of default
+
+	err := fs.Parse(args)
+	if err != nil {
+		return err
 	}
+
+	validateRequired(fs, "y", year)
+	validateRequired(fs, "d", day)
+	validateRequired(fs, "p", part)
+	validateRequired(fs, "i", input)
+
+	fmt.Println("Unlock", year, day, part, input) // TODO: Swap for function call
+	return nil
 }
 
-func defaultInput() input {
+func defaultYear() int {
 	now := time.Now()
 	year := now.Year()
 
 	// Before the start of this year's AoC default to previous year.
 	ny, _ := time.LoadLocation("America/New_York")
-	if now.Before(time.Date(now.Year(), time.December, 1, 0, 0, 0, 0, ny)) {
-		year -= 1
+	if now.Before(time.Date(year, time.December, 1, 0, 0, 0, 0, ny)) {
+		return year - 1
 	}
 
-	return input{
-		op:    opRun,
-		year:  year,
-		input: "input.txt",
+	return year
+}
+
+func validateMutEx[A comparable, B comparable](fs *flag.FlagSet, fA, fB string, vA A, vB B) {
+	var zeroA A
+	var zeroB B
+	if (vA != zeroA) && (vB != zeroB) {
+		fmt.Fprintf(fs.Output(), "flags mutually exclusive, provide one: -%s, -%s\n", fA, fB)
+		fmt.Fprintf(fs.Output(), "Usage of %s:\n", fs.Name())
+		fs.PrintDefaults()
+		os.Exit(2)
+	}
+	if (vA == zeroA) && (vB == zeroB) {
+		fmt.Fprintf(fs.Output(), "one of flags required, provide one: -%s, -%s\n", fA, fB)
+		fmt.Fprintf(fs.Output(), "Usage of %s:\n", fs.Name())
+		fs.PrintDefaults()
+		os.Exit(2)
 	}
 }
 
-func paramVals(args []string) iter.Seq2[string, string] {
-	return func(yield func(string, string) bool) {
-		for i := 0; i < len(args); i += 2 {
-			var second string
-			if i+1 < len(args) {
-				second = args[i+1]
-			}
-			if !yield(args[i], second) {
-				return
-			}
-		}
+func validateRequired[T comparable](fs *flag.FlagSet, flag string, v T) {
+	var zero T
+	if v == zero {
+		fmt.Fprintf(fs.Output(), "flag required but not provided: -%s\n", flag)
+		fmt.Fprintf(fs.Output(), "Usage of %s:\n", fs.Name())
+		fs.PrintDefaults()
+		os.Exit(2)
 	}
-}
-
-func version() string {
-	info, ok := debug.ReadBuildInfo()
-	if !ok {
-		return "unknown"
-	}
-	return info.Main.Version
 }
