@@ -1,0 +1,8 @@
+Legacy commands:
+  aoc <command> -d DAY -p {1|2} [-y YEAR current default: {{year}}]
+
+  status       Show last/locked result and last/best duration of of puzzle
+               (this is also shown after running the puzzle)
+  lock         Lock result -> future runs error if result differ, remembers fastest duration
+               (sumitting correct result with 'aoc submit' locks the result automatically)
+  unlock       Unlock result -> remember only last run

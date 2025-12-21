@@ -1,6 +1,7 @@
 package app
 
 import (
+	_ "embed"
 	"fmt"
 	"strings"
 )
@@ -20,41 +21,14 @@ const (
 	opHelp    = "help"
 )
 
-const usage = `Usage:
-  aoc -d DAY -p {1|2} [-y YEAR def: {{year}}] [{-i INPUT def: input.txt | -t}]
-  aoc init {-d DAY [-y YEAR def: {{year}}] | -m MODULENAME}
-  aoc submit 
-  aoc login -s SESSION 
-  aoc check 
-  aoc cache clear
-  aoc help [-v]
-  aoc version
+//go:embed usage.txt
+var usageText string
 
-Run and submit:
-  aoc              Run a puzzle solution
-  submit           Submit the result of your last run puzzle (requires login)
+//go:embed help.txt
+var helpText string
 
-Project setup:
-  init -d DAY      Scaffold solution files for a new day (pull puzzle input from server if logged in)
-  init -m MODULE   Create a new AoC module structure
-
-Misc:
-  login            Enables pulling of puzzle input and submission of solutions to server
-  check            Run all locked puzzles to verify results
-  cache clear      Delete all data created and kept by aoc
-  help             Show this help
-  version          Show installed aoc version`
-
-const usageAppendix = `
-
-Legacy commands:
-  aoc <command> -d DAY -p {1|2} [-y YEAR current default: {{year}}]
-
-  status       Show last/locked result and last/best duration of of puzzle
-               (this is also shown after running the puzzle)
-  lock         Lock result -> future runs error if result differ, remembers fastest duration
-               (sumitting correct result with 'aoc submit' locks the result automatically)
-  unlock       Unlock result -> remember only last run`
+//go:embed appendix.txt
+var appendixText string
 
 type Commands interface {
 	Run(year, day, part int, input string) error
@@ -71,7 +45,7 @@ type Commands interface {
 
 func Start(cmd Commands, args ...string) error {
 	if len(args) == 0 {
-		help()
+		fmt.Println(strings.ReplaceAll(usageText, "{{year}}", fmt.Sprint(defaultYear())))
 		return nil
 	}
 
@@ -227,9 +201,9 @@ func help(args ...string) error {
 		return err
 	}
 
-	text := usage
+	text := helpText
 	if *verbose {
-		text += usageAppendix
+		text += appendixText
 	}
 
 	fmt.Println(strings.ReplaceAll(text, "{{year}}", fmt.Sprint(defaultYear())))

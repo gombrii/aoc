@@ -1,0 +1,24 @@
+Usage:
+  aoc -d DAY -p {1|2} [-y YEAR def: {{year}}] [{-i INPUT def: input.txt | -t}]
+  aoc init {-d DAY [-y YEAR def: {{year}}] | -m MODULENAME}
+  aoc submit 
+  aoc login -s SESSION 
+  aoc check 
+  aoc cache clear
+  aoc help [-v]
+  aoc version
+
+Run and submit:
+  aoc              Run a puzzle solution
+  submit           Submit the result of your last run puzzle (requires login)
+
+Project setup:
+  init -d DAY      Scaffold solution files for a new day (pull puzzle input from server if logged in)
+  init -m MODULE   Create a new AoC module structure
+
+Misc:
+  login            Enables pulling of puzzle input and submission of solutions to server
+  check            Run all locked puzzles to verify results
+  cache clear      Delete all data created and kept by aoc
+  help             Show this help
+  version          Show installed aoc version

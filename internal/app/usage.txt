@@ -1,0 +1,10 @@
+Basic usage:
+  aoc -d DAY -p {1|2} [-y YEAR def: {{year}}] [{-i INPUT def: input.txt | -t}]
+  aoc init {-d DAY [-y YEAR def: {{year}}] | -m MODULENAME}
+  aoc help [-v]
+
+Examples:
+  aoc -d 3 -p 1        Run day 3, part 1 of year {{year}}
+  aoc init -d 8        Scaffold solution files for day 8 pf year {{year}}
+  aoc init -m mymodule Create a new AoC module structure including helper packages
+  aoc help             Show extended usage and other commands
