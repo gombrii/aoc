@@ -34,6 +34,10 @@ func defaultYear() int {
 	return year
 }
 
+func isSet[T comparable](v *T) bool {
+	return *v != *new(T)
+}
+
 func mutuallyExclusive[A comparable, B comparable](fs *flag.FlagSet, fA string, vA *A, fB string, vB *B) validator {
 	return func() error {
 		if *vA != *new(A) && *vB != *new(B) {

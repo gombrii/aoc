@@ -118,24 +118,24 @@ func run(cmd Commands, args ...string) error {
 	year := fs.Int("y", defaultYear(), "year of the puzzle to run")
 	day := fs.Int("d", 0, "day of the puzzle")
 	part := fs.Int("p", 0, "which part of the puzzle to run")
-	input := fs.String("i", "", `input file to feed the puzzle (default "input.txt"). Mutually exclusive with -t`)
+	input := fs.String("i", "", `input file to feed the puzzle. Mutually exclusive with -t (default "input.txt")`)
 	test := fs.Bool("t", false, `shorthand for "-i test.txt". Mutually exclusive with -i`)
 
-	err := parse(fs, buf, args,
+	if err := parse(fs, buf, args,
 		required(fs, "y", year),
 		required(fs, "d", day),
 		required(fs, "p", part),
 		mutuallyExclusive(fs, "i", input, "t", test),
 		inRange(fs, "p", part, 1, 2),
-	)
-	if err != nil {
+	); err != nil {
 		return err
 	}
 
-	if *test {
+	switch {
+	case isSet(test):
 		i := "test.txt"
 		input = &i
-	} else if *input == "" {
+	case !isSet(input):
 		i := "input.txt"
 		input = &i
 	}
@@ -145,19 +145,24 @@ func run(cmd Commands, args ...string) error {
 func initialize(cmd Commands, args ...string) error {
 	fs, buf := flagSet(opInit)
 
-	year := fs.Int("y", defaultYear(), "year of the puzzle to scaffold. Mutually exclusive with -m")
+	year := fs.Int("y", 0, fmt.Sprintf("year of the puzzle to scaffold. Mutually exclusive with -m (default %d)", defaultYear()))
 	day := fs.Int("d", 0, "scaffold a puzzle for this day. Mutually exclusive with -m")
 	module := fs.String("m", "", "create module with this name. Mutually exclusive with -d and -y")
 
-	err := parse(fs, buf, args,
+	if err := parse(fs, buf, args,
 		oneRequired(fs, "d", day, "m", module),
 		mutuallyExclusive(fs, "d", day, "m", module),
-	)
-	if err != nil {
+		mutuallyExclusive(fs, "y", year, "m", module),
+	); err != nil {
 		return err
 	}
 
-	if *module != "" {
+	if isSet(day) && !isSet(year) {
+		y := defaultYear()
+		year = &y
+	}
+
+	if isSet(module) {
 		return cmd.GenAoc(*module)
 	} else {
 		return cmd.GenDay(*year, *day)
@@ -168,8 +173,7 @@ func login(cmd Commands, args ...string) error {
 
 	session := fs.String("s", "", "your AoC account session token")
 
-	err := parse(fs, buf, args, required(fs, "s", session))
-	if err != nil {
+	if err := parse(fs, buf, args, required(fs, "s", session)); err != nil {
 		return err
 	}
 
@@ -182,8 +186,7 @@ func cacheClear(cmd Commands, args ...string) error {
 		fmt.Println("Clear aoc cache including all puzzle results, durations and login token")
 	}
 
-	err := parse(fs, buf, args)
-	if err != nil {
+	if err := parse(fs, buf, args); err != nil {
 		return err
 	}
 
@@ -196,8 +199,7 @@ func check(cmd Commands, args ...string) error {
 		fmt.Println("Run and verify correct results from all locked solutions")
 	}
 
-	err := parse(fs, buf, args)
-	if err != nil {
+	if err := parse(fs, buf, args); err != nil {
 		return err
 	}
 
@@ -210,8 +212,7 @@ func submit(cmd Commands, args ...string) error {
 		fmt.Println("Submit last run result. Requires login.")
 	}
 
-	err := parse(fs, buf, args)
-	if err != nil {
+	if err := parse(fs, buf, args); err != nil {
 		return err
 	}
 
@@ -222,8 +223,7 @@ func help(args ...string) error {
 
 	verbose := fs.Bool("v", false, "show extended usage")
 
-	err := parse(fs, buf, args)
-	if err != nil {
+	if err := parse(fs, buf, args); err != nil {
 		return err
 	}
 
@@ -242,8 +242,7 @@ func version(args ...string) error {
 		fmt.Println("Print installed aoc version")
 	}
 
-	err := parse(fs, buf, args)
-	if err != nil {
+	if err := parse(fs, buf, args); err != nil {
 		return err
 	}
 
@@ -258,13 +257,12 @@ func status(cmd Commands, args ...string) error {
 	day := fs.Int("d", 0, "day of the puzzle")
 	part := fs.Int("p", 0, "part for which to check")
 
-	err := parse(fs, buf, args,
+	if err := parse(fs, buf, args,
 		required(fs, "y", year),
 		required(fs, "d", day),
 		required(fs, "p", part),
 		inRange(fs, "p", part, 1, 2),
-	)
-	if err != nil {
+	); err != nil {
 		return err
 	}
 
@@ -277,13 +275,12 @@ func lock(cmd Commands, args ...string) error {
 	day := fs.Int("d", 0, "day of the puzzle")
 	part := fs.Int("p", 0, "part for which to check")
 
-	err := parse(fs, buf, args,
+	if err := parse(fs, buf, args,
 		required(fs, "y", year),
 		required(fs, "d", day),
 		required(fs, "p", part),
 		inRange(fs, "p", part, 1, 2),
-	)
-	if err != nil {
+	); err != nil {
 		return err
 	}
 
@@ -296,13 +293,12 @@ func unlock(cmd Commands, args ...string) error {
 	day := fs.Int("d", 0, "day of the puzzle")
 	part := fs.Int("p", 0, "part for which to check")
 
-	err := parse(fs, buf, args,
+	if err := parse(fs, buf, args,
 		required(fs, "y", year),
 		required(fs, "d", day),
 		required(fs, "p", part),
 		inRange(fs, "p", part, 1, 2),
-	)
-	if err != nil {
+	); err != nil {
 		return err
 	}
 

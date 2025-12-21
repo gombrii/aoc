@@ -84,12 +84,17 @@ func TestSuccessful(t *testing.T) {
 			with:   []any{2023, 1, 1, "input.txt"},
 		},
 		"Run other input": {
-			args:   "-d 1 -i test.txt -p 1",
+			args:   "-d 1 -i test2.txt -p 1",
 			called: "Run",
-			with:   []any{2025, 1, 1, "test.txt"},
+			with:   []any{2025, 1, 1, "test2.txt"},
 		},
 		"Run other year and input": {
-			args:   "-d 1 -i test.txt -p 1 -y 2023",
+			args:   "-d 1 -i test2.txt -p 1 -y 2023",
+			called: "Run",
+			with:   []any{2023, 1, 1, "test2.txt"},
+		},
+		"Run other year and test": {
+			args:   "-d 1 -t -p 1 -y 2023",
 			called: "Run",
 			with:   []any{2023, 1, 1, "test.txt"},
 		},
@@ -103,16 +108,6 @@ func TestSuccessful(t *testing.T) {
 			called: "Status",
 			with:   []any{2023, 1, 1, "input.txt"},
 		},
-		"Status other input": {
-			args:   "status -d 1 -i test.txt -p 1",
-			called: "Status",
-			with:   []any{2025, 1, 1, "test.txt"},
-		},
-		"Status other year and input": {
-			args:   "status -d 1 -i test.txt -p 1 -y 2023",
-			called: "Status",
-			with:   []any{2023, 1, 1, "test.txt"},
-		},
 		"Lock": {
 			args:   "lock -d 1 -p 1",
 			called: "Lock",
@@ -123,16 +118,6 @@ func TestSuccessful(t *testing.T) {
 			called: "Lock",
 			with:   []any{2023, 1, 1, "input.txt"},
 		},
-		"Lock other input": {
-			args:   "lock -d 1 -i test.txt -p 1",
-			called: "Lock",
-			with:   []any{2025, 1, 1, "test.txt"},
-		},
-		"Lock other year and input": {
-			args:   "lock -d 1 -i test.txt -p 1 -y 2023",
-			called: "Lock",
-			with:   []any{2023, 1, 1, "test.txt"},
-		},
 		"Unlock": {
 			args:   "unlock -d 1 -p 1",
 			called: "Unlock",
@@ -142,16 +127,6 @@ func TestSuccessful(t *testing.T) {
 			args:   "unlock -d 1 -y 2023 -p 1",
 			called: "Unlock",
 			with:   []any{2023, 1, 1, "input.txt"},
-		},
-		"Unlock other input": {
-			args:   "unlock -d 1 -i test.txt -p 1",
-			called: "Unlock",
-			with:   []any{2025, 1, 1, "test.txt"},
-		},
-		"Unlock other year and input": {
-			args:   "unlock -d 1 -i test.txt -p 1 -y 2023",
-			called: "Unlock",
-			with:   []any{2023, 1, 1, "test.txt"},
 		},
 		"GenDay": {
 			args:   "init -d 1",
@@ -220,6 +195,18 @@ func TestError(t *testing.T) {
 		},
 		"Run with module": {
 			args: "-d 1 -p 1 -m mymodule",
+		},
+		"Run part 0": {
+			args: "-d 1 -p 0",
+		},
+		"Run part 3": {
+			args: "-d 1 -p 3",
+		},
+		"Run with session": {
+			args: "-d 1 -p 1 -s abc",
+		},
+		"Run with verbose": {
+			args: "-d 1 -p 1 -v",
 		},
 		"Status missing part": {
 			args: "status -d 1",
