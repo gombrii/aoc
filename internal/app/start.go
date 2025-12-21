@@ -77,28 +77,28 @@ func Start(cmd Commands, args ...string) error {
 
 	// Run
 	if strings.Contains(args[0], "-") {
-		return run(args...)
+		return run(cmd, args...)
 	}
 
 	switch args[0] {
 	case opStatus:
-		return status(args[1:]...)
+		return status(cmd, args[1:]...)
 	case opLock:
-		return lock(args[1:]...)
+		return lock(cmd, args[1:]...)
 	case opUnlock:
-		return unlock(args[1:]...)
+		return unlock(cmd, args[1:]...)
 	case opInit:
-		return initialize(args[1:]...)
+		return initialize(cmd, args[1:]...)
 	case opLogin:
-		return login(args[1:]...)
+		return login(cmd, args[1:]...)
 	case opHelp:
 		return help(args[1:]...)
 	case opVersion:
 		return version(args[1:]...)
 	case opSubmit:
-		return submit(args[1:]...)
+		return submit(cmd, args[1:]...)
 	case opCheck:
-		return check(args[1:]...)
+		return check(cmd, args[1:]...)
 	case opCache:
 		if len(args) < 2 {
 			return fmt.Errorf("unknown command: %s", args[0])
@@ -106,13 +106,13 @@ func Start(cmd Commands, args ...string) error {
 		if args[1] != opClear {
 			return fmt.Errorf("unknown command: %s", args[1])
 		}
-		return cacheClear(args[2:]...)
+		return cacheClear(cmd, args[2:]...)
 	default:
 		return fmt.Errorf("unknown command: %s", args[0])
 	}
 }
 
-func run(args ...string) error {
+func run(cmd Commands, args ...string) error {
 	fs, buf := flagSet(opRun)
 
 	year := fs.Int("y", defaultYear(), "year of the puzzle to run")
@@ -139,10 +139,9 @@ func run(args ...string) error {
 		input = &i
 	}
 
-	fmt.Println("Run", *year, *day, *part, *input, *test) // TODO: Swap for function call
-	return nil
+	return cmd.Run(*year, *day, *part, *input)
 }
-func initialize(args ...string) error {
+func initialize(cmd Commands, args ...string) error {
 	fs, buf := flagSet(opInit)
 
 	year := fs.Int("y", defaultYear(), "year of the puzzle to scaffold. Mutually exclusive with -m")
@@ -157,10 +156,13 @@ func initialize(args ...string) error {
 		return err
 	}
 
-	fmt.Println("Init", *year, *day, *module) // TODO: Swap for function call
-	return nil
+	if *module != "" {
+		return cmd.GenAoc(*module)
+	} else {
+		return cmd.GenDay(*year, *day)
+	}
 }
-func login(args ...string) error {
+func login(cmd Commands, args ...string) error {
 	fs, buf := flagSet(opLogin)
 
 	session := fs.String("s", "", "your AoC account session token")
@@ -170,10 +172,9 @@ func login(args ...string) error {
 		return err
 	}
 
-	fmt.Println("Login", *session) // TODO: Swap for function call
-	return nil
+	return cmd.Login(*session)
 }
-func cacheClear(args ...string) error {
+func cacheClear(cmd Commands, args ...string) error {
 	fs, buf := flagSet(opCache + " " + opClear)
 	fs.Usage = func() {
 		fmt.Println("Usage of cache clear:")
@@ -185,10 +186,9 @@ func cacheClear(args ...string) error {
 		return err
 	}
 
-	fmt.Println("Cache Clear") // TODO: Swap for function call
-	return nil
+	return cmd.ClearCache()
 }
-func check(args ...string) error {
+func check(cmd Commands, args ...string) error {
 	fs, buf := flagSet(opCheck)
 	fs.Usage = func() {
 		fmt.Println("Usage of check:")
@@ -200,10 +200,9 @@ func check(args ...string) error {
 		return err
 	}
 
-	fmt.Println("Check") // TODO: Swap for function call
-	return nil
+	return cmd.Check()
 }
-func submit(args ...string) error {
+func submit(cmd Commands, args ...string) error {
 	fs, buf := flagSet(opSubmit)
 	fs.Usage = func() {
 		fmt.Println("Usage of submit:")
@@ -215,8 +214,7 @@ func submit(args ...string) error {
 		return err
 	}
 
-	fmt.Println("Submit") // TODO: Swap for function call
-	return nil
+	return cmd.Submit()
 }
 func help(args ...string) error {
 	fs, buf := flagSet(opHelp)
@@ -234,7 +232,6 @@ func help(args ...string) error {
 	}
 
 	fmt.Println(strings.ReplaceAll(text, "{{year}}", fmt.Sprint(defaultYear())))
-
 	return nil
 }
 func version(args ...string) error {
@@ -253,13 +250,12 @@ func version(args ...string) error {
 	return nil
 }
 
-func status(args ...string) error {
+func status(cmd Commands, args ...string) error {
 	fs, buf := flagSet(opStatus)
 
 	year := fs.Int("y", defaultYear(), "year of the puzzle")
 	day := fs.Int("d", 0, "day of the puzzle")
 	part := fs.Int("p", 0, "part for which to check")
-	input := "input.txt"
 
 	err := parse(fs, buf, args,
 		required(fs, "y", year),
@@ -270,16 +266,14 @@ func status(args ...string) error {
 		return err
 	}
 
-	fmt.Println("Status", *year, *day, *part, input) // TODO: Swap for function call
-	return nil
+	return cmd.Status(*year, *day, *part, "input.txt")
 }
-func lock(args ...string) error {
+func lock(cmd Commands, args ...string) error {
 	fs, buf := flagSet(opLock)
 
 	year := fs.Int("y", defaultYear(), "year of the puzzle")
 	day := fs.Int("d", 0, "day of the puzzle")
 	part := fs.Int("p", 0, "part for which to check")
-	input := "input.txt"
 
 	err := parse(fs, buf, args,
 		required(fs, "y", year),
@@ -290,16 +284,14 @@ func lock(args ...string) error {
 		return err
 	}
 
-	fmt.Println("Lock", *year, *day, *part, input) // TODO: Swap for function call
-	return nil
+	return cmd.Lock(*year, *day, *part, "input.txt")
 }
-func unlock(args ...string) error {
+func unlock(cmd Commands, args ...string) error {
 	fs, buf := flagSet(opUnlock)
 
 	year := fs.Int("y", defaultYear(), "year of the puzzle")
 	day := fs.Int("d", 0, "day of the puzzle")
 	part := fs.Int("p", 0, "part for which to check")
-	input := "input.txt"
 
 	err := parse(fs, buf, args,
 		required(fs, "y", year),
@@ -310,6 +302,5 @@ func unlock(args ...string) error {
 		return err
 	}
 
-	fmt.Println("Unlock", *year, *day, *part, input) // TODO: Swap for function call
-	return nil
+	return cmd.Unlock(*year, *day, *part, "input.txt")
 }

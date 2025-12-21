@@ -11,7 +11,7 @@ import (
 
 type validator func() error
 
-var ErrInput = errors.New("invalid input")
+var ErrInput = errors.New("")
 
 func printVersion() {
 	info, ok := debug.ReadBuildInfo()
@@ -83,12 +83,12 @@ func flagSet(name string) (*flag.FlagSet, *bytes.Buffer) {
 func parse(fs *flag.FlagSet, buf *bytes.Buffer, args []string, validators ...validator) error {
 	err := fs.Parse(args)
 	if err != nil {
-		return fmt.Errorf("%w\n%s", ErrInput, buf.String())
+		return fmt.Errorf("%w%s", ErrInput, buf.String())
 	}
 
 	for _, valid := range validators {
 		if err := valid(); err != nil {
-			return fmt.Errorf("%w\n%s", ErrInput, buf.String())
+			return fmt.Errorf("%w%s", ErrInput, buf.String())
 		}
 	}
 

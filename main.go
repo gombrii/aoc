@@ -15,10 +15,11 @@ import (
 
 func main() {
 	if err := app.Start(commands.Commands{}, os.Args[1:]...); err != nil {
-		fmt.Fprintln(os.Stderr, "Error:", err)
 		if errors.Is(err, app.ErrInput) {
+			fmt.Fprintln(os.Stderr, err)
 			os.Exit(2)
 		}
+		fmt.Fprintln(os.Stderr, "Error:", err)
 		os.Exit(1)
 	}
 }
