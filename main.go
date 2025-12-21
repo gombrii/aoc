@@ -5,6 +5,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -14,7 +15,10 @@ import (
 
 func main() {
 	if err := app.Start(commands.Commands{}, os.Args[1:]...); err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(2)
+		fmt.Fprintln(os.Stderr, "Error:", err)
+		if errors.Is(err, app.ErrInput) {
+			os.Exit(2)
+		}
+		os.Exit(1)
 	}
 }
