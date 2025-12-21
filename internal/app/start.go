@@ -126,6 +126,7 @@ func run(cmd Commands, args ...string) error {
 		required(fs, "d", day),
 		required(fs, "p", part),
 		mutuallyExclusive(fs, "i", input, "t", test),
+		inRange(fs, "p", part, 1, 2),
 	)
 	if err != nil {
 		return err
@@ -261,6 +262,7 @@ func status(cmd Commands, args ...string) error {
 		required(fs, "y", year),
 		required(fs, "d", day),
 		required(fs, "p", part),
+		inRange(fs, "p", part, 1, 2),
 	)
 	if err != nil {
 		return err
@@ -279,6 +281,7 @@ func lock(cmd Commands, args ...string) error {
 		required(fs, "y", year),
 		required(fs, "d", day),
 		required(fs, "p", part),
+		inRange(fs, "p", part, 1, 2),
 	)
 	if err != nil {
 		return err
@@ -297,6 +300,7 @@ func unlock(cmd Commands, args ...string) error {
 		required(fs, "y", year),
 		required(fs, "d", day),
 		required(fs, "p", part),
+		inRange(fs, "p", part, 1, 2),
 	)
 	if err != nil {
 		return err

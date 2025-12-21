@@ -73,6 +73,19 @@ func required[T comparable](fs *flag.FlagSet, flag string, v *T) validator {
 	}
 }
 
+func inRange(fs *flag.FlagSet, flag string, v *int, min, max int) validator {
+	return func() error {
+		if *v < min || *v > max {
+			fmt.Fprintf(fs.Output(), "value of -%s must be at least %d and at most %d: \n", flag, min, max)
+			fmt.Fprintf(fs.Output(), "Usage of %s:\n", fs.Name())
+			fs.PrintDefaults()
+			return ErrInput
+		}
+
+		return nil
+	}
+}
+
 func flagSet(name string) (*flag.FlagSet, *bytes.Buffer) {
 	var buf bytes.Buffer
 	fs := flag.NewFlagSet(name, flag.ContinueOnError)
